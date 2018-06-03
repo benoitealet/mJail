@@ -1,0 +1,73 @@
+<div class="row no-gutters" style="height: 100%;">
+    <div class="panelLeft col-sm-6">
+
+
+        <div id="headerBar">
+            <div class="logo pull-left">
+                <span>Ɱ</span>ail
+            </div>
+            
+            <div class="actions pull-right">
+                <button class="btn btn-warning" (click)="selectionDelete()" [disabled]="(mails | filter : 'selected' : true).length == 0">Delete</button>
+                <button class="btn btn-danger" (click)="deleteAll()">Delete All</button>
+                <button class="btn btn-dark" (click)="selectionSetUnread()" [disabled]="(mails | filter : 'selected' : true).length == 0">Set unread</button>
+                <button class="btn btn-success" (click)="selectionSetRead()" [disabled]="(mails | filter : 'selected' : true).length == 0">Set read</button>
+            </div>
+            <br clear="both" />
+        </div>
+
+        <div *ngIf="wsConnected == false" class="alert alert-danger col-xs-8" style="margin: 20px">
+            Could not establish connection to the mail server
+        </div>
+
+        <ngb-tabset class="mails" type="pills" (tabChange)="userChange($event)">
+            <ngb-tab *ngFor="let user of users; index as index" title="{{user}}" id="tabUsers_{{index}}">
+                <ng-template ngbTabTitle>
+                    <i *ngIf="!user">Anonymous</i>
+                    ({{ (mails | filter : 'user' : user | filter : 'read' : false).length }}/{{ (mails | filter : 'user' : user).length }})
+                </ng-template>
+
+                <ng-template ngbTabContent>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th></th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let mail of mails | filter : 'user' : user" 
+                                [class.isNew]="!mail.read"
+                                [class.isSelected]="mail.selected"
+                                (click)="mailClick(mail, $event)"
+                                >
+                                <td>{{mail.subject }}</td>
+                                <td>
+                                    <span *ngIf="mail.attachments?.length">
+                                        <i class="fa fa-paperclip"></i>
+                                    </span>
+                                </td>
+                                <td>{{mail.from.name}} &lt;{{mail.from.address}}&gt;</td>
+                                <td>
+                                    <ul>
+                                        <li *ngFor="let to of mail.to">{{to.name}} &lt;{{to.address}}&gt;</li>
+                                    </ul>
+                                </td>
+                                <td>{{mail.date | date:'dd/MM/yyyy HH:mm:ss'}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </ng-template>
+            </ngb-tab>
+
+        </ngb-tabset>
+    </div>
+    <div class="panelViewMail col-sm-6">
+        <app-mail-view [mail]="lastMail" (onEvent)="onChildEvent($event)"></app-mail-view>
+    </div>
+</div>
+

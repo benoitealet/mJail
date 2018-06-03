@@ -1,0 +1,111 @@
+$mainBackgroundColor: #E4E4E4;
+$secondaryBackgroundColor: #FBFBFF;
+
+:host {
+    width: 100%;
+    font-size: 0.76rem;
+}
+
+.panelLeft {
+    max-height: 100%; 
+    overflow-y: auto;
+    background-color: $secondaryBackgroundColor;
+}
+
+.panelViewMail {
+    max-height: 100%; 
+    overflow-y: auto;
+    background-color: $mainBackgroundColor;
+}
+
+
+
+#headerBar {
+    background: $mainBackgroundColor;
+    
+    margin-bottom: 5px;
+
+    position: sticky;
+    z-index: 10;
+    top: 0px;
+
+    button.btn {
+        margin: 0px 5px 2px;
+    }
+
+    .logo {
+
+        color: #2F9BE8;
+
+        font-weight: bolder;
+        font-size: 2em;
+        text-shadow: 0px 0px 1px white;
+
+        padding: 5px 10px;
+
+        span {
+            font-size: 1.2em;
+            color: #FF6600;
+            display: inline-block;
+            transform: rotate(-18deg);
+
+            text-shadow: 0px 0px 3px #2F9BE8;
+        }
+
+    }
+
+    .logo:hover span{
+        transition: transform 550ms ease-out 2s;
+        transform: rotate(702deg);
+    }
+
+    .actions {
+        padding: 5px 10px;
+    }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #2F9BE8;
+    color: white;
+}
+tr {
+    border-bottom: 1px solid #2F9BE8;
+    cursor: pointer;
+
+    transition: all 100ms ease-in;
+    transition-property: background-color, color;
+}
+
+tr.isNew {
+    font-weight: 600;
+}
+tr.isSelected {
+    background-color: #2F9BE8;
+    color: white;
+    border-bottom: 1px solid white;
+}
+
+tr.isHidden {
+    display: none;
+}
+
+td {
+    padding: 2px 5px;
+}
+
+td ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+td ul li {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+

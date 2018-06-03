@@ -1,0 +1,41 @@
+:host {
+    display: inline-block;
+    width: 100%;
+}
+
+.mailView {
+    padding: 10px;
+}
+
+.mailBodyContainer {
+    margin-top: 15px;
+}
+
+.mailContentBody {
+    overflow: hidden;
+    background: white;
+    padding: 0.6rem;
+}
+
+.mailContentBody * {
+    max-width: 100% !important;
+}
+
+.mailContentBody.mailContentBody-text { 
+    white-space: nowrap;
+    font-family: monospace;
+}
+
+.actions {
+    padding: 5px 10px;
+
+    button.btn {
+        margin: 0px 5px 2px;
+    }
+
+}
+
+
+.gray {
+    color: gray;
+}

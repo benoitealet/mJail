@@ -1,0 +1,6 @@
+{
+    "ignore": [
+        "front-mjail/*",
+        "static/front-mjail/*"
+    ]
+}

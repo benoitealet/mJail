@@ -1,0 +1,28 @@
+<script>
+    
+    function connect() {
+        var ws = new WebSocket('ws://labcms:8080/time');
+
+        ws.onerror = function (e) {
+            console.log('ERROR', e);
+        }
+        ws.onclose = function (e) {
+            console.log('CLOSED', e);
+        }
+
+        ws.onopen = function () {
+            console.log('OPEN');
+        }
+
+        ws.onmessage = function (ms) {
+            console.log('MESSAGE', ms);
+        }
+        
+        return ws;
+    }
+    
+    var ws = connect();
+    
+    
+    
+</script>
