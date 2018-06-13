@@ -26,6 +26,9 @@ export class MailListComponent implements OnInit {
 
     private wsConnected: Boolean = false;
 
+    private search: string = '';
+    private searchTmp: string = '';
+    
     constructor() {
 
     }
@@ -35,6 +38,11 @@ export class MailListComponent implements OnInit {
             this.sendMessage('getInit', null);
         });
 
+    }
+
+    private applySearch() {
+        console.log('Apply Search');
+        this.search = this.searchTmp;
     }
 
     private mailClick(mail, $event) {

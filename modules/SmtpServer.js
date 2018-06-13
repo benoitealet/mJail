@@ -111,7 +111,7 @@ module.exports.createServer = (smtpPort, maxSmtpSizeKo) => {
     const smtpServer = new SMTPServer({
         banner: 'jMail!',
         authOptional: true,
-        disabledCommands: ['STARTTLS'],
+        //disabledCommands: ['STARTTLS'],
         allowInsecureAuth: true,
         onAuth: onAuth,
         onData: onData(maxSmtpSizeKo),

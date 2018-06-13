@@ -54,7 +54,6 @@ module.exports.getSchema = (mongoose) => {
 
     mailSchema.statics.findAttachmentInfo = function (mailId, contentId) {
         return new Promise((resolve, reject) => {
-            console.log(mailId, contentId);
             this.findOne({
                 _id: mailId,
                 'attachments.contentId': contentId

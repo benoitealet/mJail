@@ -7,7 +7,19 @@
                 <span>Ɱ</span>ail
             </div>
             
-            <div class="actions pull-right">
+            <div class="actions pull-right form-inline" style="white-space: nowrap">
+                <div class="input-group">
+                    <input placeholder="Search.." 
+                           type="text" 
+                           class="form-control" 
+                           [value]="searchTmp" 
+                           (input)="searchTmp = $event.target.value;"
+                           (keyup)="$event.keyCode == 13 && applySearch()"
+                    >
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" (click)="applySearch()" [disabled]="searchTmp == ''"><i class="fa fa-search"></i></button>
+                    </div>
+                </div> 
                 <button class="btn btn-warning" (click)="selectionDelete()" [disabled]="(mails | filter : 'selected' : true).length == 0">Delete</button>
                 <button class="btn btn-danger" (click)="deleteAll()">Delete All</button>
                 <button class="btn btn-dark" (click)="selectionSetUnread()" [disabled]="(mails | filter : 'selected' : true).length == 0">Set unread</button>
@@ -40,7 +52,7 @@
                         </thead>
 
                         <tbody>
-                            <tr *ngFor="let mail of mails | filter : 'user' : user" 
+                            <tr *ngFor="let mail of mails | filter : 'user' : user | mailSearch : search" 
                                 [class.isNew]="!mail.read"
                                 [class.isSelected]="mail.selected"
                                 (click)="mailClick(mail, $event)"
