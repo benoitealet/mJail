@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-exports.router = (config, model) => (app) => {
+module.exports = (config, model) => (app) => {
         const express = require('express');
         const path = require('path');
 

@@ -25,8 +25,11 @@ const model = require(__dirname + '/model/model.js');
 model.connect(config.mongoDbUrl);
 
 webServer
-        .createServer(config.httpPort, require('./router.js').router(config, model), require('./controller/websocketController.js')(model))
-        .catch((e) => {
+        .createServer(
+            config.httpPort, 
+            require('./router.js')(config, model), 
+            require('./controller/websocketController.js')(model)
+        ).catch((e) => {
             console.log(e);
             process.exit(1);
         });
