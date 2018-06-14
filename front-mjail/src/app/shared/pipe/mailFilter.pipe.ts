@@ -1,4 +1,5 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import {Pipe, PipeTransform, Inject} from '@angular/core';
+import {DOCUMENT} from '@angular/platform-browser';
 import * as $ from 'jquery';
 
 @Pipe({
@@ -6,6 +7,12 @@ import * as $ from 'jquery';
     pure: true
 })
 export class MailFilterPipe implements PipeTransform {
+    private server: string;
+    
+    constructor(@Inject(DOCUMENT) private document) {
+        this.server = '//' + document.location.hostname + ':' + document.location.port;
+    }
+    
     transform(html: string, mail: any): string {
         let $html = $('<div>' + html + '</div>');
         
@@ -14,7 +21,7 @@ export class MailFilterPipe implements PipeTransform {
                 let $e = $(e);
                 let src = $e.attr('src');
 
-                src = 'http://labcms:8080/getAttachment/' + mail._id + '/' + src.split(':')[1]
+                src = this.server + '/getAttachment/' + mail._id + '/' + src.split(':')[1]
 
                 $e.attr('src', src);
             } catch(e) {

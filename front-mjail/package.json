@@ -4,8 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --disable-host-check",
-    "build": "ng build --base-href=front-mjail",
-    "buildProd": "ng build --base-href=front-mjail --prod",
+    "build": "ng build",
+    "buildProd": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

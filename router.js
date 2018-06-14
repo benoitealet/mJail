@@ -5,10 +5,6 @@ exports.router = (config, model) => (app) => {
         const express = require('express');
         const path = require('path');
 
-        app.get('/', function (req, res) {
-            res.send('hello world');
-        });
-
         app.get('/getAttachment/:mailId/:contentId', function (req, res) {
             let mailId = req.params.mailId;
             let contentId = req.params.contentId;

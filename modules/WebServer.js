@@ -11,7 +11,7 @@ module.exports.createServer = function (httpPort, routing, onWsClient) {
         try {
             const app = express();
 
-            app.use('/static', express.static(__dirname + '/../static'));
+            
 
             app.use(function (req, res, next) {
                 res.header("Access-Control-Allow-Origin", "*");
@@ -19,7 +19,11 @@ module.exports.createServer = function (httpPort, routing, onWsClient) {
                 next();
             });
 
+            app.use('/', express.static(__dirname + '/../public'));
+
             routing(app);
+            
+            
 
             console.log('HTTP Listen on port', httpPort);
             let server = app.listen(httpPort);

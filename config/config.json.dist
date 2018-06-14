@@ -1,0 +1,21 @@
+{
+    "smtpPort": 1025,
+    "smtpKey": {
+        "private": "smtpKey/private.key",
+        "cert": "smtpKey/cert.crt"
+    },
+    "smtpMaxSizeKo": 102400,
+    "httpPort": 8080,
+    "mongoDbUrl": "mongodb://labcms/mjail",
+    "attachmentDir": "attachments", 
+
+    "smtpClient": {
+        "host": "localhost",
+        "port": 1025,
+        "secure": false,
+        "auth": {
+            "user": "username",
+            "pass": "password"
+        }
+    }
+}

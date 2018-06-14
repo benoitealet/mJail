@@ -1,6 +1,6 @@
-import {NgModule} from '@angular/core';
-import {Component, OnInit} from '@angular/core';
+import {NgModule, Component, OnInit, Inject} from '@angular/core';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {DOCUMENT} from '@angular/platform-browser';
 
 @NgModule({
     imports: [NgbModule]
@@ -14,23 +14,26 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 export class MailListComponent implements OnInit {
 
-    private mails: any[] = [];
+
+    mails: any[] = [];
 
     private ws: any;
 
-    private users: String[] = [''];
+    users: String[] = [''];
 
-    private lastMail: any;
+    lastMail: any;
 
     private currentUser: String = '';
 
-    private wsConnected: Boolean = false;
+    wsConnected: Boolean = false;
 
-    private search: string = '';
-    private searchTmp: string = '';
-    
-    constructor() {
+    search: string = '';
+    searchTmp: string = '';
 
+    private wsHost: string;
+
+    constructor(@Inject(DOCUMENT) private document) {
+        this.wsHost = document.location.hostname + ':' + document.location.port;
     }
 
     ngOnInit() {
@@ -40,8 +43,7 @@ export class MailListComponent implements OnInit {
 
     }
 
-    private applySearch() {
-        console.log('Apply Search');
+    applySearch() {
         this.search = this.searchTmp;
     }
 
@@ -93,25 +95,25 @@ export class MailListComponent implements OnInit {
         }
     }
 
-    private selectionSetRead() {
+    selectionSetRead() {
         let allId = this.mails.filter((m) => m.selected).map((m) => m._id);
         this.sendMessage('setRead', allId);
     }
-    private selectionSetUnread() {
+    selectionSetUnread() {
         let allId = this.mails.filter((m) => m.selected).map((m) => m._id);
         this.sendMessage('setUnread', allId);
     }
-    private deleteAll() {
+    deleteAll() {
         this.sendMessage('deleteByUser', this.currentUser);
         this.lastMail = null;
     }
-    private selectionDelete() {
+    selectionDelete() {
         let allId = this.mails.filter((m) => m.selected).map((m) => m._id);
         this.sendMessage('delete', allId);
         this.lastMail = null;
     }
 
-    private userChange($event) {
+    userChange($event) {
         this.lastMail = null;
         this.currentUser = this.users[$event.nextId.split('_')[1]];
         this.mails.forEach((m) => {
@@ -119,7 +121,7 @@ export class MailListComponent implements OnInit {
         });
     }
 
-    private onChildEvent($event) {
+    onChildEvent($event) {
         switch ($event.type) {
             case 'deliverMail':
                 console.log('send deliverMail via ws');
@@ -148,7 +150,7 @@ export class MailListComponent implements OnInit {
     private connect() {
 
         return new Promise((resolve) => {
-            this.ws = new WebSocket('ws://labcms:8080');
+            this.ws = new WebSocket('ws://' + this.wsHost);
             this.ws.onopen = () => {
                 console.log('Ws Connected');
                 this.wsConnected = true;

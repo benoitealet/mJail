@@ -1,5 +1,5 @@
-import {Component, EventEmitter, OnInit, Input, Output} from '@angular/core';
-
+import {Component, EventEmitter, OnInit, Input, Output, Inject} from '@angular/core';
+import {DOCUMENT} from '@angular/platform-browser';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 import * as EmailValidator from 'email-validator';
@@ -17,14 +17,18 @@ export class MailViewComponent implements OnInit {
     deliverModal: any = null;
     externalSendAddress: string = '';
 
-    constructor(private modalService: NgbModal) {}
+    private server: string;
+
+    constructor(private modalService: NgbModal, @Inject(DOCUMENT) private document) {
+        this.server = '//' + document.location.hostname + ':' + document.location.port;
+    }
 
     ngOnInit() {
     }
 
 
     public generateAttachmentLink(mailId, contentId, fileName) {
-        return 'http://labcms:8080/getAttachment/' + mailId + '/' + contentId;
+        return this.server + '/getAttachment/' + mailId + '/' + contentId;
     }
 
     showDeliverPopup(popupDeliver, mail) {
