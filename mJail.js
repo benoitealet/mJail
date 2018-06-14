@@ -27,6 +27,7 @@ model.connect(config.mongoDbUrl);
 webServer
         .createServer(
             config.httpPort, 
+            config.cert,
             require('./router.js')(config, model), 
             require('./controller/websocketController.js')(model)
         ).catch((e) => {

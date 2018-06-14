@@ -1,9 +1,10 @@
 {
     "smtpPort": 1025,
-    "smtpKey": {
-        "private": "smtpKey/private.key",
-        "cert": "smtpKey/cert.crt"
+    "certINACTIF": {
+        "key": "../mJailCert/labcms.key",
+        "cert": "../mJailCert/labcms.cert"
     },
+    "cert": null,
     "smtpMaxSizeKo": 102400,
     "httpPort": 8080,
     "mongoDbUrl": "mongodb://labcms/mjail",

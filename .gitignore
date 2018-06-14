@@ -2,3 +2,4 @@
 /node_modules/
 /test/vendor/
 /test/
+/config/config.json

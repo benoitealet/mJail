@@ -150,7 +150,15 @@ export class MailListComponent implements OnInit {
     private connect() {
 
         return new Promise((resolve) => {
-            this.ws = new WebSocket('ws://' + this.wsHost);
+            
+            console.log('HTTP protocol: ', document.location.protocol);
+            let protocol = 'ws';
+            if(document.location.protocol === 'https:') {
+                protocol = 'wss';
+            }
+            console.log('WS protocol: ', protocol);
+            
+            this.ws = new WebSocket(protocol + '://' + this.wsHost);
             this.ws.onopen = () => {
                 console.log('Ws Connected');
                 this.wsConnected = true;
