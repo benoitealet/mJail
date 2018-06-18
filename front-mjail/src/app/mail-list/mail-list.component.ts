@@ -1,6 +1,6 @@
 import {NgModule, Component, OnInit, Inject} from '@angular/core';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {DOCUMENT} from '@angular/platform-browser';
+import {DOCUMENT, Title} from '@angular/platform-browser';
 
 @NgModule({
     imports: [NgbModule]
@@ -32,11 +32,12 @@ export class MailListComponent implements OnInit {
 
     private wsHost: string;
 
-    constructor(@Inject(DOCUMENT) private document) {
+    constructor(@Inject(DOCUMENT) private document, private titleService: Title ) {
         this.wsHost = document.location.hostname + ':' + document.location.port;
     }
 
     ngOnInit() {
+        this.titleService.setTitle('Connecting..');
         this.connect().then(() => {
             this.sendMessage('getInit', null);
         });
@@ -89,7 +90,7 @@ export class MailListComponent implements OnInit {
                     //mail.read = true;
                     this.sendMessage('setRead', [
                         mail._id
-                    ])
+                    ]);
                 }
             }, 500);
         }
@@ -119,6 +120,7 @@ export class MailListComponent implements OnInit {
         this.mails.forEach((m) => {
             m.selected = false;
         });
+        this.updateTitle();
     }
 
     onChildEvent($event) {
@@ -176,8 +178,8 @@ export class MailListComponent implements OnInit {
                     if (mail.user && this.users.indexOf(mail.user) === -1) {
                         this.users.push(mail.user);
                     }
+                    this.updateTitle();
                 } else if (message.type === 'setInit') {
-
                     message.payload.mails.forEach((mail) => {
                         this.mails.unshift(mail);
 
@@ -185,6 +187,7 @@ export class MailListComponent implements OnInit {
                             this.users.push(mail.user);
                         }
                     });
+                    this.updateTitle();
                 } else if (message.type === 'setRead') {
 
                     message.payload.forEach((messageId) => {
@@ -196,6 +199,7 @@ export class MailListComponent implements OnInit {
                         })
 
                     });
+                    this.updateTitle();
                 } else if (message.type === 'setUnread') {
 
                     message.payload.forEach((messageId) => {
@@ -207,6 +211,7 @@ export class MailListComponent implements OnInit {
                         })
 
                     });
+                    this.updateTitle();
                 } else if (message.type === 'deleted') {
                     this.mails = this.mails.filter((m) => {
                         return message.payload.indexOf(m._id) === -1
@@ -241,6 +246,17 @@ export class MailListComponent implements OnInit {
                 }, 1000);
             };
         });
+    }
+
+    private updateTitle() {
+        
+        let filterUser = this.mails.filter(item => (item.user === this.currentUser || (!item.user && !this.currentUser)));
+        
+        console.log(filterUser);
+        let filterRead = filterUser.filter(item => (!item.read));
+        console.log(filterRead);
+        
+        this.titleService.setTitle((this.currentUser?this.currentUser:'Anonymous') + ' (' + filterRead.length + '/' + filterUser.length + ')');
     }
 
 
