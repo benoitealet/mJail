@@ -9,15 +9,14 @@ const config = require(__dirname + '/config/config.json');
 try {
     fs.accessSync(config.attachmentDir, fs.constants.W_OK | fs.constants.R_OK);
 } catch (err) {
-    console.error("Can't write on attichemnt folder");
+    console.error("Can't write on attachemnt folder");
     console.error("Defined in config.json, \"attachmentDir\"");
     console.error("Current value:", config.attachmentDir);
     process.exit(1);
 }
 
-
 const smtpServer = require(__dirname + '/modules/SmtpServer.js');
-smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo);
+smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo, config.cert);
 
 const webServer = require(__dirname + '/modules/WebServer.js');
 

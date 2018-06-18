@@ -106,18 +106,30 @@ function broadcastListeners(mail, session) {
     });
 }
 
-module.exports.createServer = (smtpPort, maxSmtpSizeKo) => {
+module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
     const fs = require('fs');
-    const smtpServer = new SMTPServer({
+    
+    let smtpConfig = {
         banner: 'jMail!',
         authOptional: true,
         //disabledCommands: ['STARTTLS'],
-        allowInsecureAuth: true,
+        allowInsecureAuth: false,
         onAuth: onAuth,
         onData: onData(maxSmtpSizeKo),
         maxAllowedUnauthenticatedCommands: 50,
-        //logger: true,
-    });
+        logger: true,
+    };
+    
+    if(cert) {
+        smtpConfig.secure = cert.ssl;
+        smtpConfig.key = fs.readFileSync(cert.key);
+        smtpConfig.cert = fs.readFileSync(cert.cert);
+        smtpConfig.rejectUnauthorized = false;
+        
+        
+    }
+    
+    const smtpServer = new SMTPServer(smtpConfig);
 
     smtpServer.listen(smtpPort);
     console.log('SMTP Listen on port', smtpPort);
