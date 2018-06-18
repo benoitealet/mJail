@@ -216,6 +216,7 @@ export class MailListComponent implements OnInit {
                     this.mails = this.mails.filter((m) => {
                         return message.payload.indexOf(m._id) === -1
                     })
+                    this.updateTitle();
                 } else if (message.type === 'deletedByUser') {
                     let user = message.payload;
                     this.mails = this.mails.filter((m) => {
@@ -225,6 +226,7 @@ export class MailListComponent implements OnInit {
                             return m.user;
                         }
                     })
+                    this.updateTitle();
                 }
             };
 
@@ -251,10 +253,7 @@ export class MailListComponent implements OnInit {
     private updateTitle() {
         
         let filterUser = this.mails.filter(item => (item.user === this.currentUser || (!item.user && !this.currentUser)));
-        
-        console.log(filterUser);
         let filterRead = filterUser.filter(item => (!item.read));
-        console.log(filterRead);
         
         this.titleService.setTitle((this.currentUser?this.currentUser:'Anonymous') + ' (' + filterRead.length + '/' + filterUser.length + ')');
     }
