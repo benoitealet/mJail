@@ -116,8 +116,7 @@ module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
         allowInsecureAuth: false,
         onAuth: onAuth,
         onData: onData(maxSmtpSizeKo),
-        maxAllowedUnauthenticatedCommands: 50,
-        logger: true,
+        maxAllowedUnauthenticatedCommands: 50
     };
     
     if(cert) {
@@ -132,7 +131,7 @@ module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
     const smtpServer = new SMTPServer(smtpConfig);
 
     smtpServer.listen(smtpPort);
-    console.log('SMTP Listen on port', smtpPort);
+    console.log('SMTP Listen on port', smtpPort, 'security:', cert?(cert.ssl?'ssl':'tls'):'none');
 
     smtpServer.on('error', (error) => {
         console.log('ERROR');

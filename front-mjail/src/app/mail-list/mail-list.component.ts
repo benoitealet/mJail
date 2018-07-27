@@ -1,6 +1,7 @@
-import {NgModule, Component, OnInit, Inject} from '@angular/core';
+import {NgModule, Component, OnInit, Inject, HostListener, Input} from '@angular/core';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, Title} from '@angular/platform-browser';
+import * as Fuse from 'fuse.js';
 
 @NgModule({
     imports: [NgbModule]
@@ -14,8 +15,9 @@ import {DOCUMENT, Title} from '@angular/platform-browser';
 
 export class MailListComponent implements OnInit {
 
-
     mails: any[] = [];
+
+    filteredMails: any[] = [];
 
     private ws: any;
 
@@ -27,13 +29,32 @@ export class MailListComponent implements OnInit {
 
     wsConnected: Boolean = false;
 
-    search: string = '';
-    searchTmp: string = '';
-
     private wsHost: string;
 
-    constructor(@Inject(DOCUMENT) private document, private titleService: Title ) {
+    private search: string = '';
+
+    private fuseOptions: Object;
+
+    constructor(@Inject(DOCUMENT) private document, private titleService: Title) {
         this.wsHost = document.location.hostname + ':' + document.location.port;
+        
+        this.fuseOptions = {
+            shouldSort: true,
+            tokenize: true,
+            matchAllTokens: true,
+            threshold: 0,
+            location: 0,
+            distance: 100,
+            maxPatternLength: 32,
+            minMatchCharLength: 2,
+            keys: [
+                "subject",
+                "from.address",
+                "from.name",
+                "to.address",
+                "to.name",
+            ]
+        };
     }
 
     ngOnInit() {
@@ -44,8 +65,71 @@ export class MailListComponent implements OnInit {
 
     }
 
-    applySearch() {
-        this.search = this.searchTmp;
+    applyFilter() {
+        console.log('applyFilter');
+        this.filteredMails = [];
+        this.filteredMails = this.mails.filter((m) => {
+            return ((m.user || null) === (this.currentUser || null))
+        });
+        if(this.search) {
+            let fuse = new Fuse(this.filteredMails, this.fuseOptions); // "list" is the item array
+            this.filteredMails = fuse.search(this.search);
+        }
+
+    }
+
+    @HostListener('window:keyup', ['$event'])
+    keyEvent(event: KeyboardEvent) {
+        
+
+        if (event.key === 'Delete') {
+            let exit = false;
+            let lastIndex = null;
+            for (let i = 0; i < this.filteredMails.length && !exit; i++) {
+                if (this.filteredMails[i] == this.lastMail) {
+                    lastIndex = i;
+                    exit = true;
+                }
+            }
+            this.selectionDelete();
+            setTimeout(() => {
+                if(exit && this.filteredMails[lastIndex]) {
+                    this.lastMail = this.filteredMails[lastIndex];
+                    this.lastMail.selected = true;
+                }
+            }, 100);
+//        } else if (event.key === 'a' && event.ctrlKey) {
+//            this.filteredMails.forEach((m) => m.selected = true);
+//            event.preventDefault();
+        } else if (event.key === 'ArrowUp') {
+            //get selected
+            let exit = false;
+            for (let i = 0; i < this.filteredMails.length && !exit; i++) {
+                if (i > 0 && this.filteredMails[i] == this.lastMail) {
+                    this.filteredMails.forEach((m) => {
+                        m.selected = false
+                    });
+                    this.filteredMails[i-1].selected = true;
+                    this.lastMail = this.filteredMails[i-1];
+                    exit = true;
+                }
+            }
+        } else if (event.key === 'ArrowDown') {
+            //get selected
+            let exit = false;
+            for (let i = 0; i < this.filteredMails.length-1 && !exit; i++) {
+                if (this.filteredMails[i] == this.lastMail) {
+                    this.filteredMails.forEach((m) => {
+                        m.selected = false
+                    });
+                    this.filteredMails[i+1].selected = true;
+                    this.lastMail = this.filteredMails[i+1];
+                    exit = true;
+                }
+            }
+        }
+
+
     }
 
     private mailClick(mail, $event) {
@@ -121,7 +205,10 @@ export class MailListComponent implements OnInit {
             m.selected = false;
         });
         this.updateTitle();
+        this.applyFilter();
     }
+
+
 
     onChildEvent($event) {
         switch ($event.type) {
@@ -149,17 +236,19 @@ export class MailListComponent implements OnInit {
 
 
 
+
+
     private connect() {
 
         return new Promise((resolve) => {
-            
+
             console.log('HTTP protocol: ', document.location.protocol);
             let protocol = 'ws';
-            if(document.location.protocol === 'https:') {
+            if (document.location.protocol === 'https:') {
                 protocol = 'wss';
             }
             console.log('WS protocol: ', protocol);
-            
+
             this.ws = new WebSocket(protocol + '://' + this.wsHost);
             this.ws.onopen = () => {
                 console.log('Ws Connected');
@@ -178,6 +267,7 @@ export class MailListComponent implements OnInit {
                     if (mail.user && this.users.indexOf(mail.user) === -1) {
                         this.users.push(mail.user);
                     }
+                    this.applyFilter();
                     this.updateTitle();
                 } else if (message.type === 'setInit') {
                     message.payload.mails.forEach((mail) => {
@@ -187,6 +277,7 @@ export class MailListComponent implements OnInit {
                             this.users.push(mail.user);
                         }
                     });
+                    this.applyFilter();
                     this.updateTitle();
                 } else if (message.type === 'setRead') {
 
@@ -216,6 +307,7 @@ export class MailListComponent implements OnInit {
                     this.mails = this.mails.filter((m) => {
                         return message.payload.indexOf(m._id) === -1
                     })
+                    this.applyFilter();
                     this.updateTitle();
                 } else if (message.type === 'deletedByUser') {
                     let user = message.payload;
@@ -226,6 +318,7 @@ export class MailListComponent implements OnInit {
                             return m.user;
                         }
                     })
+                    this.applyFilter();
                     this.updateTitle();
                 }
             };
@@ -251,11 +344,11 @@ export class MailListComponent implements OnInit {
     }
 
     private updateTitle() {
-        
+
         let filterUser = this.mails.filter(item => (item.user === this.currentUser || (!item.user && !this.currentUser)));
         let filterRead = filterUser.filter(item => (!item.read));
-        
-        this.titleService.setTitle((this.currentUser?this.currentUser:'Anonymous') + ' (' + filterRead.length + '/' + filterUser.length + ')');
+
+        this.titleService.setTitle((this.currentUser ? this.currentUser : 'Anonymous') + ' (' + filterRead.length + '/' + filterUser.length + ')');
     }
 
 

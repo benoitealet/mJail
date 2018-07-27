@@ -24,10 +24,8 @@ module.exports.createServer = function (httpPort, cert, routing, onWsClient) {
             routing(app);
 
 
-
-            console.log('HTTP Listen on port', httpPort);
-
             let server;
+            let mode = '';
             if (cert) {
                 const https = require('https');
                 const fs = require('fs');
@@ -40,15 +38,16 @@ module.exports.createServer = function (httpPort, cert, routing, onWsClient) {
                     rejectUnauthorized: false
                 };
                 server = https.createServer(options, app);
-                console.log('HTTPS');
+                mode = 'HTTPS';
             } else {
                 server = app.listen(httpPort);
-                console.log('HTTP');
+                mode = 'HTTP';
             }
-
+            
             server.listen(httpPort, function() {
-                console.log( 'Express server listening on port ' + server.address().port );
+                console.log(mode + ' Listen on port', httpPort);
             });
+            
             
             wss = new SocketServer({server});
 

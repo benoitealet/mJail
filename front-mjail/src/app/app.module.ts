@@ -15,7 +15,6 @@ import {FilterPipe} from './shared/pipe/filter.pipe';
 import {ExcludePipe} from './shared/pipe/exclude.pipe';
 import {SizeConvertPipe} from './shared/pipe/sizeConvert.pipe';
 import {MailFilterPipe} from './shared/pipe/mailFilter.pipe';
-import {MailSearchPipe} from './shared/pipe/mailSearch.pipe';
 
 @NgModule({
     declarations: [
@@ -24,7 +23,6 @@ import {MailSearchPipe} from './shared/pipe/mailSearch.pipe';
         ExcludePipe,
         SizeConvertPipe,
         MailFilterPipe,
-        MailSearchPipe,
         MailListComponent,
         MailViewComponent
     ],

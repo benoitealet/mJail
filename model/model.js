@@ -6,7 +6,9 @@ module.exports.connect = (mongoDbUrl) => {
 
         //Set up default mongoose connection
 
-        mongoose.connect(mongoDbUrl).then(resolve);
+        mongoose.connect(mongoDbUrl, {
+            useNewUrlParser: true
+        }).then(resolve);
 
 
         // Get Mongoose to use the global promise library

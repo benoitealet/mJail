@@ -21,7 +21,9 @@ smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo, config.cert);
 const webServer = require(__dirname + '/modules/WebServer.js');
 
 const model = require(__dirname + '/model/model.js');
-model.connect(config.mongoDbUrl);
+model.connect(config.mongoDbUrl, {
+    useNewUrlParser: true
+});
 
 webServer
         .createServer(
