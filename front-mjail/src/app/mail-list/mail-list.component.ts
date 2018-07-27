@@ -37,7 +37,7 @@ export class MailListComponent implements OnInit {
 
     constructor(@Inject(DOCUMENT) private document, private titleService: Title) {
         this.wsHost = document.location.hostname + ':' + document.location.port;
-        
+
         this.fuseOptions = {
             shouldSort: true,
             tokenize: true,
@@ -71,7 +71,7 @@ export class MailListComponent implements OnInit {
         this.filteredMails = this.mails.filter((m) => {
             return ((m.user || null) === (this.currentUser || null))
         });
-        if(this.search) {
+        if (this.search) {
             let fuse = new Fuse(this.filteredMails, this.fuseOptions); // "list" is the item array
             this.filteredMails = fuse.search(this.search);
         }
@@ -80,7 +80,7 @@ export class MailListComponent implements OnInit {
 
     @HostListener('window:keyup', ['$event'])
     keyEvent(event: KeyboardEvent) {
-        
+
 
         if (event.key === 'Delete') {
             let exit = false;
@@ -93,37 +93,51 @@ export class MailListComponent implements OnInit {
             }
             this.selectionDelete();
             setTimeout(() => {
-                if(exit && this.filteredMails[lastIndex]) {
+                if (exit && this.filteredMails[lastIndex]) {
                     this.lastMail = this.filteredMails[lastIndex];
                     this.lastMail.selected = true;
                 }
             }, 100);
-//        } else if (event.key === 'a' && event.ctrlKey) {
-//            this.filteredMails.forEach((m) => m.selected = true);
-//            event.preventDefault();
+        } else if (event.key === 'a' && event.ctrlKey) {
+            this.filteredMails.forEach((m) => m.selected = true);
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (window.getSelection) {
+                if (window.getSelection().empty) {  // Chrome
+                    window.getSelection().empty();
+                } else if (window.getSelection().removeAllRanges) {  // Firefox
+                    window.getSelection().removeAllRanges();
+                }
+            }
+
         } else if (event.key === 'ArrowUp') {
             //get selected
             let exit = false;
             for (let i = 0; i < this.filteredMails.length && !exit; i++) {
                 if (i > 0 && this.filteredMails[i] == this.lastMail) {
-                    this.filteredMails.forEach((m) => {
-                        m.selected = false
-                    });
-                    this.filteredMails[i-1].selected = true;
-                    this.lastMail = this.filteredMails[i-1];
+                    if (!event.shiftKey) {
+                        this.filteredMails.forEach((m) => {
+                            m.selected = false
+                        });
+                    }
+                    this.filteredMails[i - 1].selected = true;
+                    this.lastMail = this.filteredMails[i - 1];
                     exit = true;
                 }
             }
         } else if (event.key === 'ArrowDown') {
             //get selected
             let exit = false;
-            for (let i = 0; i < this.filteredMails.length-1 && !exit; i++) {
+            for (let i = 0; i < this.filteredMails.length - 1 && !exit; i++) {
                 if (this.filteredMails[i] == this.lastMail) {
-                    this.filteredMails.forEach((m) => {
-                        m.selected = false
-                    });
-                    this.filteredMails[i+1].selected = true;
-                    this.lastMail = this.filteredMails[i+1];
+                    if (!event.shiftKey) {
+                        this.filteredMails.forEach((m) => {
+                            m.selected = false
+                        });
+                    }
+                    this.filteredMails[i + 1].selected = true;
+                    this.lastMail = this.filteredMails[i + 1];
                     exit = true;
                 }
             }
