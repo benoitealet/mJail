@@ -14,13 +14,13 @@ function onAuth(auth, session, callback) {
 
 function onData(maxSmtpSizeKo) {
     return (stream, session, callback) => {
-        
+
         let sumData = maxSmtpSizeKo;
         let discard = false;
-        
+
         let mailparser = new MailParser({
         });
-        
+
         stream.on('data', (data) => {
             if(sumData > maxSmtpSizeKo * 1024) {
                 if(!discard) {
@@ -108,7 +108,7 @@ function broadcastListeners(mail, session) {
 
 module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
     const fs = require('fs');
-    
+
     let smtpConfig = {
         banner: 'jMail!',
         authOptional: true,
@@ -116,18 +116,18 @@ module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
         allowInsecureAuth: false,
         onAuth: onAuth,
         onData: onData(maxSmtpSizeKo),
-        maxAllowedUnauthenticatedCommands: 50
+        maxAllowedUnauthenticatedCommands: 5000
     };
-    
+
     if(cert) {
         smtpConfig.secure = cert.ssl;
         smtpConfig.key = fs.readFileSync(cert.key);
         smtpConfig.cert = fs.readFileSync(cert.cert);
         smtpConfig.rejectUnauthorized = false;
-        
-        
+
+
     }
-    
+
     const smtpServer = new SMTPServer(smtpConfig);
 
     smtpServer.listen(smtpPort);
