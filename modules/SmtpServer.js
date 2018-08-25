@@ -116,7 +116,7 @@ module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
         allowInsecureAuth: false,
         onAuth: onAuth,
         onData: onData(maxSmtpSizeKo),
-        maxAllowedUnauthenticatedCommands: 5000
+        maxAllowedUnauthenticatedCommands: 50000
     };
 
     if(cert) {

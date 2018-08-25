@@ -4,7 +4,6 @@ const fs = require('fs');
 const fsExtra = require('fs-extra');
 const path = require('path');
 const config = require('../config/config.json');
-const sanitize = require('sanitize-filename');
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport(config.smtpClient);
 
@@ -175,8 +174,11 @@ module.exports = (model) => {
                                 ].join(path.sep)
                             });
                         });
-                        
-                        transporter.sendMail(mail);
+                        try {
+                            transporter.sendMail(mail);
+                        } catch(e) {
+                            console.warn(e);
+                        }
                     });
 
 

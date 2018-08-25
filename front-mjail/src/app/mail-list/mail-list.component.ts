@@ -66,7 +66,6 @@ export class MailListComponent implements OnInit {
     }
 
     applyFilter() {
-        console.log('applyFilter');
         this.filteredMails = [];
         this.filteredMails = this.mails.filter((m) => {
             return ((m.user || null) === (this.currentUser || null))

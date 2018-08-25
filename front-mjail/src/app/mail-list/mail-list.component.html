@@ -19,7 +19,6 @@
                 <button class="btn btn-danger" (click)="deleteAll()">Delete All</button>
                 <button class="btn btn-dark" (click)="selectionSetUnread()" [disabled]="(filteredMails | filter : 'selected' : true).length == 0">Set unread</button>
                 <button class="btn btn-success" (click)="selectionSetRead()" [disabled]="(filteredMails | filter : 'selected' : true).length == 0">Set read</button>
-                <button class="btn" (click)="applyFilter()">Apply filter</button>
             </div>
             <br clear="both" />
         </div>
