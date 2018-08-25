@@ -18,5 +18,6 @@
             "user": "username",
             "pass": "password"
         }
-    }
+    },
+    "pruneDays": 10
 }

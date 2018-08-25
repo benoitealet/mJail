@@ -2,7 +2,7 @@ let models = [];
 
 module.exports.connect = (mongoDbUrl) => {
     return new Promise((resolve, reject) => {
-        var mongoose = require('mongoose');
+        const mongoose = require('mongoose');
 
         //Set up default mongoose connection
 
@@ -15,7 +15,7 @@ module.exports.connect = (mongoDbUrl) => {
         mongoose.Promise = global.Promise;
         //Get the default connection
 
-        db = mongoose.connection;
+        let db = mongoose.connection;
 
         //Bind connection to error event (to get notification of connection errors)
         db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -32,3 +32,38 @@ module.exports.getModel = function (modelName) {
     }
 }
 
+
+module.exports.startPruneMonitor = function (pruneDays, onMailDeleted) {
+
+    if (pruneDays > 0) {
+        setInterval(() => {
+
+            models['Mail'].find({
+                date: {
+                    '$lt': require('moment')().subtract(pruneDays, 'days')
+                }
+            }, '_id', function(err, docs) {
+                if(err) {
+                    console.log(err);
+                    process.exit(1);
+                }
+
+                let deleted = docs.map(d => d._id);
+
+                models['Mail'].deleteMany({
+                    _id: {
+                        $in: deleted
+                    }
+                }, (err) => {
+                    if(err) {
+                        console.log(err);
+                    }
+                });
+                onMailDeleted(deleted);
+                console.log('Pruned '+ deleted.length + ' mails');
+            });
+
+
+        }, 1000);
+    }
+}

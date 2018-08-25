@@ -23,34 +23,41 @@ const webServer = require(__dirname + '/modules/WebServer.js');
 const model = require(__dirname + '/model/model.js');
 model.connect(config.mongoDbUrl, {
     useNewUrlParser: true
-});
+}).then(() => {
+    model.startPruneMonitor(config.pruneDays, (mailsId) => {
+        webServer.broadcast({
+            type: 'deleted',
+            payload: mailsId
+        })
+    });
 
-webServer
+    webServer
         .createServer(
-            config.httpPort, 
+            config.httpPort,
             config.cert,
-            require('./router.js')(config, model), 
+            require('./router.js')(config, model),
             require('./controller/websocketController.js')(model)
         ).catch((e) => {
-            console.log(e);
-            process.exit(1);
-        });
-
-let messageNumber = 0;
-
-smtpServer.onMailReceived((mail) => {
-    console.log(mail);
-    model.getModel('Mail').saveMail(mail).then((mail) => {
-
-        webServer.broadcast({
-            type: 'mailReceived',
-            payload: {
-                mail: mail
-            }
-        })
-    }).catch((err) => {
-        console.log('Error while accepting mail: ', err);
+        console.log(e);
+        process.exit(1);
     });
+
+
+    smtpServer.onMailReceived((mail) => {
+        console.log(mail);
+        model.getModel('Mail').saveMail(mail).then((mail) => {
+
+            webServer.broadcast({
+                type: 'mailReceived',
+                payload: {
+                    mail: mail
+                }
+            })
+        }).catch((err) => {
+            console.log('Error while accepting mail: ', err);
+        });
+    });
+
 });
 
 

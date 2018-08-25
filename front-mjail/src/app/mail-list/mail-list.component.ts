@@ -337,21 +337,21 @@ export class MailListComponent implements OnInit {
             };
 
             this.ws.onclose = (e) => {
-                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+                console.error('Socket has been closed: ', e);
                 this.wsConnected = false;
-                setTimeout(() => {
+                /*setTimeout(() => {
                     this.connect();
-                }, 1000);
+                }, 1000);*/
             };
 
             this.ws.onerror = (err) => {
-                console.error('Socket encountered error: ', err, 'Closing socket');
+                console.error('Socket encountered error: ', err);
                 this.wsConnected = false;
-                this.ws.close();
+                //this.ws.close();
 
-                setTimeout(() => {
+                /*setTimeout(() => {
                     this.connect();
-                }, 1000);
+                }, 1000);*/
             };
         });
     }
