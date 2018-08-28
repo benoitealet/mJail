@@ -12,7 +12,7 @@
 }
 
 .mailContentBody {
-    overflow: hidden;
+    overflow: auto;
     background: white;
     padding: 0.6rem;
 }
@@ -21,7 +21,7 @@
     max-width: 100% !important;
 }
 
-.mailContentBody.mailContentBody-text { 
+.mailContentBody.mailContentBody-text {
     white-space: nowrap;
     font-family: monospace;
 }
