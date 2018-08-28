@@ -20,31 +20,31 @@
                 <b>Subject: </b> {{mail.subject}}
             </div>
             <div>
-                <b>To: </b> 
+                <b>To: </b>
                 <span *ngFor="let to of mail.to; last as isLast">
                     {{to.name}} &lt;{{to.address}}&gt;<span *ngIf="!isLast">, </span>
                 </span>
             </div>
             <div *ngIf="mail.cc">
-                <b>CC: </b> 
+                <b>CC: </b>
                 <span *ngFor="let cc of mail.cc; last as isLast">
                     {{cc.name}} &lt;{{cc.address}}&gt;<span *ngIf="!isLast">, </span>
                 </span>
             </div>
             <div *ngIf="mail.bcc">
-                <b>BCC: </b> 
+                <b>BCC: </b>
                 <span *ngFor="let bcc of mail.bcc; last as isLast">
                     {{bcc.name}} &lt;{{bcc.address}}&gt;<span *ngIf="!isLast">, </span>
                 </span>
             </div>
             <div *ngIf="(mail.attachments | exclude : 'contentDisposition' : 'inline' ).length">
-                <b>Attachments: </b> 
+                <b>Attachments: </b>
                 <span *ngFor="let att of mail.attachments | exclude : 'contentDisposition' : 'inline'; last as isLast">
                     <a target="_blank" href="{{generateAttachmentLink(mail._id, att.contentId, att.fileName)}}">{{att.fileName}}</a> ({{att.length | sizeConvert}})<span *ngIf="!isLast">, </span>
                 </span>
             </div>
             <div *ngIf="(mail.attachments | filter : 'contentDisposition' : 'inline' ).length">
-                <b>Inline Attachments: </b> 
+                <b>Inline Attachments: </b>
                 <span *ngFor="let att of mail.attachments | filter : 'contentDisposition' : 'inline'; last as isLast">
                     <a target="_blank" href="{{generateAttachmentLink(mail._id, att.contentId, att.fileName)}}">{{att.fileName}}</a> ({{att.length | sizeConvert}})<span *ngIf="!isLast">, </span>
                 </span>
@@ -58,7 +58,7 @@
                     <ng-template ngbTabTitle>HTML</ng-template>
 
                     <ng-template ngbTabContent>
-                        <div class="mailContentBody" [innerHTML]="mail.html ? (mail.html | mailFilter : mail) : null"></div>
+                        <div class="mailContentBody" [innerHTML]="mail.html ? (mail.html | mailFilter : mail | safe : 'html') : null"></div>
                     </ng-template>
                 </ngb-tab>
 
@@ -118,21 +118,21 @@
         <div class="form-check" *ngFor="let to of mail.to">
              <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" [checked]="to.deliveryEnabled" (change)="to.deliveryEnabled = !to.deliveryEnabled">
-                <span class="gray">To:</span> 
+                <span class="gray">To:</span>
                 {{to.name}} &lt;{{to.address}}&gt;
             </label>
         </div>
         <div class="form-check" *ngFor="let cc of mail.cc">
              <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" [checked]="cc.deliveryEnabled" (change)="cc.deliveryEnabled = !cc.deliveryEnabled">
-                <span class="gray">CC:</span> 
+                <span class="gray">CC:</span>
                 {{cc.name}} &lt;{{cc.address}}&gt;
             </label>
         </div>
         <div class="form-check" *ngFor="let bcc of mail.bcc">
              <label class="form-check-label">
                 <input class="form-check-input" type="checkbox" [checked]="bcc.deliveryEnabled" (change)="bcc.deliveryEnabled = !bcc.deliveryEnabled">
-                <span class="gray">BCC:</span> 
+                <span class="gray">BCC:</span>
                 {{bcc.name}} &lt;{{bcc.address}}&gt;
             </label>
         </div>

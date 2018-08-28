@@ -110,73 +110,76 @@ module.exports = (model) => {
                         _id: data.payload.id
                     }, {
                     }).then((dbMail) => {
-
-                        let mail = {};
-
-                        mail.from = {
-                            name: dbMail.from.name,
-                            address: dbMail.from.address
-                        }
-
-                        if (data.payload.to) {
-                            mail.to = [];
-                            data.payload.to.forEach((to) => {
-                                console.log({
-                                    name: to.name,
-                                    address: to.address
-                                });
-                                mail.to.push({
-                                    name: to.name,
-                                    address: to.address
-                                });
-
-                            });
-                        }
-                        if (data.payload.cc) {
-                            mail.cc = [];
-                            data.payload.cc.forEach((cc) => {
-                                mail.cc.push({
-                                    name: cc.name,
-                                    address: cc.address
-                                });
-                            });
-                        }
-                        if (data.payload.bcc) {
-                            mail.bcc = [];
-                            data.payload.bcc.forEach((bcc) => {
-                                mail.bcc.push({
-                                    name: bcc.name,
-                                    address: bcc.address
-                                });
-                            });
-                        }
-
-                        mail.subject = dbMail.subject;
-                        mail.text = dbMail.text;
-                        mail.html = dbMail.html;
-
-                        mail.headers = {};
-                        dbMail.headers.forEach((h) => {
-                            mail.headers[h.name] = h.value;
-                        });
-                        
-                        mail.attachments = [];
-                        dbMail.attachments.forEach((a) => {
-                            mail.attachments.push({
-                                filename: a.fileName,
-                                contentType: a.contentType,
-                                contentDisposition: a.contentDisposition,
-                                cid: a.contentId,
-                                path: [
-                                    config.attachmentDir,
-                                    dbMail._id.toString(),
-                                    a.contentId.toString()
-                                ].join(path.sep)
-                            });
-                        });
                         try {
-                            transporter.sendMail(mail);
-                        } catch(e) {
+                            let mail = {};
+
+                            mail.from = {
+                                name: dbMail.from.name,
+                                address: dbMail.from.address
+                            }
+
+                            if (data.payload.to) {
+                                mail.to = [];
+                                data.payload.to.forEach((to) => {
+                                    mail.to.push({
+                                        name: to.name,
+                                        address: to.address
+                                    });
+
+                                });
+                            }
+                            if (data.payload.cc) {
+                                mail.cc = [];
+                                data.payload.cc.forEach((cc) => {
+                                    mail.cc.push({
+                                        name: cc.name,
+                                        address: cc.address
+                                    });
+                                });
+                            }
+                            if (data.payload.bcc) {
+                                mail.bcc = [];
+                                data.payload.bcc.forEach((bcc) => {
+                                    mail.bcc.push({
+                                        name: bcc.name,
+                                        address: bcc.address
+                                    });
+                                });
+                            }
+
+                            mail.subject = dbMail.subject;
+                            mail.text = dbMail.text;
+                            mail.html = dbMail.html;
+
+                            mail.headers = {};
+                            if (dbMail.headers) {
+                                dbMail.headers.forEach((h) => {
+                                    mail.headers[h.name] = h.value;
+                                });
+                            }
+
+                            mail.attachments = [];
+                            if (dbMail.attachments) {
+                                dbMail.attachments.forEach((a) => {
+                                    mail.attachments.push({
+                                        filename: a.fileName,
+                                        contentType: a.contentType,
+                                        contentDisposition: a.contentDisposition,
+                                        cid: a.contentId,
+                                        path: [
+                                            config.attachmentDir,
+                                            dbMail._id.toString(),
+                                            a.contentId.toString()
+                                        ].join(path.sep)
+                                    });
+                                });
+                            }
+                            try {
+                                transporter.sendMail(mail);
+                            } catch (e) {
+                                console.warn(e);
+                            }
+                        }catch(e) {
                             console.warn(e);
                         }
                     });
