@@ -19,7 +19,7 @@ try {
 }
 
 const smtpServer = require(__dirname + '/modules/SmtpServer.js');
-smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo, config.cert);
+smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo, config.certTls);
 
 const webServer = require(__dirname + '/modules/WebServer.js');
 
