@@ -24,12 +24,13 @@
     "@angular/router": "^6.0.2",
     "@ng-bootstrap/ng-bootstrap": "^2.0.0",
     "angular-font-awesome": "^3.1.2",
-    "bootstrap": "^4.1.1",
+    "bootstrap": "^4.3.1",
     "core-js": "^2.5.4",
     "email-validator": "^2.0.4",
     "font-awesome": "^4.7.0",
-    "fuse.js": "^3.2.1",
-    "jquery": "^3.3.1",
+    "fuse.js": "3.2.1",
+    "jquery": "^3.4.1",
+    "ng-push": "^0.2.2",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {

@@ -6,12 +6,12 @@
             <div class="logo pull-left">
                 <span>Ɱ</span>ail
             </div>
-            
+
             <div class="actions pull-right form-inline" style="white-space: nowrap">
 
-                <input placeholder="Search.." 
-                       type="text" 
-                       class="form-control" 
+                <input placeholder="Search.."
+                       type="text"
+                       class="form-control"
                        [value]="search"
                        (input)="search = $event.target.value; applyFilter()"
                 >
@@ -27,11 +27,12 @@
             Could not establish connection to the mail server
         </div>
 
-        <ngb-tabset class="mails" type="pills" (tabChange)="userChange($event)">
-            <ngb-tab *ngFor="let user of users; index as index" title="{{user}}" id="tabUsers_{{index}}">
+        <ngb-tabset class="mails" id="test" type="pills" (tabChange)="userChange($event)">
+            <ngb-tab *ngFor="let user of users" title="{{user}}" id="tabUsers_{{user}}">
                 <ng-template ngbTabTitle>
                     <i *ngIf="!user">Anonymous</i>
                     ({{ (mails | filter : 'user' : user | filter : 'read' : false).length }}/{{ (mails | filter : 'user' : user).length }})
+                   <i class="fa {{notifications[user] == 1 ? 'fa-bell' : 'fa-bell-slash'}} notifications" id="{{user}}" (click)="notificationsClick(user)"></i>
                 </ng-template>
 
                 <ng-template ngbTabContent>
@@ -47,7 +48,7 @@
                         </thead>
 
                         <tbody>
-                            <tr *ngFor="let mail of filteredMails" 
+                            <tr *ngFor="let mail of filteredMails"
                                 [class.isNew]="!mail.read"
                                 [class.isSelected]="mail.selected"
                                 (click)="mailClick(mail, $event)"

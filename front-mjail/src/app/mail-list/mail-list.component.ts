@@ -2,6 +2,8 @@ import {NgModule, Component, OnInit, Inject, HostListener, Input} from '@angular
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, Title} from '@angular/platform-browser';
 import * as Fuse from 'fuse.js';
+import { PushNotificationsService} from 'ng-push';
+import {forEach} from '@angular/router/src/utils/collection';
 
 @NgModule({
     imports: [NgbModule]
@@ -11,6 +13,7 @@ import * as Fuse from 'fuse.js';
     selector: 'app-mail-list',
     templateUrl: './mail-list.component.html',
     styleUrls: ['./mail-list.component.scss'],
+    providers: [PushNotificationsService],
 })
 
 export class MailListComponent implements OnInit {
@@ -23,9 +26,13 @@ export class MailListComponent implements OnInit {
 
     users: String[] = [''];
 
+    notifications: any[] = [];
+
+    lastNotif: Date = null;
+
     lastMail: any;
 
-    private currentUser: String = '';
+    currentUser: String = '';
 
     wsConnected: Boolean = false;
 
@@ -35,7 +42,10 @@ export class MailListComponent implements OnInit {
 
     private fuseOptions: Object;
 
-    constructor(@Inject(DOCUMENT) private document, private titleService: Title) {
+    constructor(@Inject(DOCUMENT) private document, private titleService: Title, private _pushNotifications: PushNotificationsService) {
+
+        this._pushNotifications.requestPermission();
+
         this.wsHost = document.location.hostname + ':' + document.location.port;
 
         this.fuseOptions = {
@@ -213,12 +223,23 @@ export class MailListComponent implements OnInit {
 
     userChange($event) {
         this.lastMail = null;
-        this.currentUser = this.users[$event.nextId.split('_')[1]];
+        this.currentUser = $event.nextId.split('_')[1];
         this.mails.forEach((m) => {
             m.selected = false;
         });
         this.updateTitle();
         this.applyFilter();
+    }
+
+    notificationsClick(user) {
+      if (user) {
+        if (this.notifications[user] === 0) {
+          this.notifications[user] = 1;
+        } else {
+          this.notifications[user] = 0;
+        }
+        localStorage.setItem(user, this.notifications[user])
+      }
     }
 
 
@@ -279,6 +300,31 @@ export class MailListComponent implements OnInit {
                     this.mails.unshift(mail);
                     if (mail.user && this.users.indexOf(mail.user) === -1) {
                         this.users.push(mail.user);
+                        this.notifications[mail.user] = 0;
+                    }
+
+                    //10 secondes entre chaque notifs
+                    var diff = new Date() - this.lastNotif;
+                    diff = Math.floor(diff/1000) % 60;
+                    if (this.notifications[mail.user] == 1 && (diff > 10 || !this.lastNotif)) {
+                      this.lastNotif = new Date();
+                      this._pushNotifications.create(
+                        'New Mail',
+                        {
+                          body: 'New Mail from ' + mail.from.address + ' in ' + mail.user,
+                          icon: 'assets/favicon.png',
+                        }
+                      ).subscribe(resolve => {
+                        if (resolve.event.type === 'click') {
+                          document.getElementById('tabUsers_'+mail.user).click();
+                          this.mails.forEach((m) => {
+                            m.selected = false;
+                          })
+                          this.lastMail = mail;
+                          this.lastMail.selected = true;
+                          window.focus();
+                        }
+                      })
                     }
                     this.applyFilter();
                     this.updateTitle();
@@ -288,7 +334,10 @@ export class MailListComponent implements OnInit {
 
                         if (mail.user && this.users.indexOf(mail.user) === -1) {
                             this.users.push(mail.user);
+                            this.notifications[mail.user] = 0;
                         }
+
+                        this.notifications[mail.user] = localStorage.getItem(mail.user);
                     });
                     this.applyFilter();
                     this.updateTitle();

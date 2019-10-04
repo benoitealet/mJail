@@ -7,22 +7,32 @@ $secondaryBackgroundColor: #FBFBFF;
 }
 
 .panelLeft {
-    max-height: 100%; 
+    max-height: 100%;
     overflow-y: auto;
     background-color: $secondaryBackgroundColor;
 }
 
 .panelViewMail {
-    max-height: 100%; 
+    max-height: 100%;
     overflow-y: auto;
     background-color: $mainBackgroundColor;
 }
 
+.notifications {
+  color: #FF6600;
+}
 
+.notifications:hover{
+  transform: rotate(-18deg);
+}
+
+.fa-bell {
+  text-shadow: 0px 0px 5px white;
+}
 
 #headerBar {
     background: $mainBackgroundColor;
-    
+
     margin-bottom: 5px;
 
     position: sticky;
@@ -32,7 +42,7 @@ $secondaryBackgroundColor: #FBFBFF;
     button.btn {
         margin: 0px 5px 2px;
     }
-    
+
     .input-group button.btn {
         margin: 0px;
     }
@@ -58,7 +68,7 @@ $secondaryBackgroundColor: #FBFBFF;
 
     }
 
-    .logo:hover span{
+    .logo-m:hover {
         transition: transform 550ms ease-out 2s;
         transform: rotate(702deg);
     }
