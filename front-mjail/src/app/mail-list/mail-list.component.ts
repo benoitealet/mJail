@@ -28,7 +28,7 @@ export class MailListComponent implements OnInit {
 
     notifications: any[] = [];
 
-    lastNotif: Date = null;
+    lastNotif: any= null;
 
     lastMail: any;
 
@@ -38,7 +38,7 @@ export class MailListComponent implements OnInit {
 
     private wsHost: string;
 
-    private search: string = '';
+    search: string = '';
 
     private fuseOptions: Object;
 
@@ -304,10 +304,10 @@ export class MailListComponent implements OnInit {
                     }
 
                     //10 secondes entre chaque notifs
-                    var diff = new Date() - this.lastNotif;
+                    let diff = (new Date()).getTime() - this.lastNotif;
                     diff = Math.floor(diff/1000) % 60;
                     if (this.notifications[mail.user] == 1 && (diff > 10 || !this.lastNotif)) {
-                      this.lastNotif = new Date();
+                      this.lastNotif = (new Date()).getTime();
                       this._pushNotifications.create(
                         'New Mail',
                         {
