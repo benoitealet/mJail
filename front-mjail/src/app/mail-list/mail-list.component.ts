@@ -238,7 +238,7 @@ export class MailListComponent implements OnInit {
         } else {
           this.notifications[user] = 0;
         }
-        localStorage.setItem(user, this.notifications[user])
+        localStorage.setItem(user, this.notifications[user]);
       }
     }
 
@@ -306,7 +306,10 @@ export class MailListComponent implements OnInit {
                     //10 secondes entre chaque notifs
                     let diff = (new Date()).getTime() - this.lastNotif;
                     diff = Math.floor(diff/1000) % 60;
-                    if (this.notifications[mail.user] == 1 && (diff > 10 || !this.lastNotif)) {
+                    if (
+                      (this.notifications[mail.user] == 1 || (!mail.user && this.notifications['__Anonymous'] == 1) ) &&
+                      (diff > 10 || !this.lastNotif)
+                    ) {
                       this.lastNotif = (new Date()).getTime();
                       this._pushNotifications.create(
                         'New Mail',
@@ -316,12 +319,15 @@ export class MailListComponent implements OnInit {
                         }
                       ).subscribe(resolve => {
                         if (resolve.event.type === 'click') {
-                          document.getElementById('tabUsers_'+mail.user).click();
+                          if (mail.user) {
+                            document.getElementById('tabUsers_' + mail.user).click();
+                          }
                           this.mails.forEach((m) => {
                             m.selected = false;
                           })
                           this.lastMail = mail;
                           this.lastMail.selected = true;
+                          this.lastMail.read = true;
                           window.focus();
                         }
                       })
@@ -337,7 +343,11 @@ export class MailListComponent implements OnInit {
                             this.notifications[mail.user] = 0;
                         }
 
-                        this.notifications[mail.user] = localStorage.getItem(mail.user);
+                        if (mail.user) {
+                          this.notifications[mail.user] = localStorage.getItem(mail.user);
+                        } else {
+                          this.notifications['__Anonymous'] = localStorage.getItem('__Anonymous');
+                        }
                     });
                     this.applyFilter();
                     this.updateTitle();

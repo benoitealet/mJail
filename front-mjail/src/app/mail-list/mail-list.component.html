@@ -32,7 +32,8 @@
                 <ng-template ngbTabTitle>
                     <i *ngIf="!user">Anonymous</i>
                     ({{ (mails | filter : 'user' : user | filter : 'read' : false).length }}/{{ (mails | filter : 'user' : user).length }})
-                   <i class="fa {{notifications[user] == 1 ? 'fa-bell' : 'fa-bell-slash'}} notifications" id="{{user}}" (click)="notificationsClick(user)"></i>
+                    <i *ngIf="user" class="fa {{notifications[user] == 1 ? 'fa-bell' : 'fa-bell-slash'}} notifications" id="{{user}}" (click)="notificationsClick(user)"></i>
+                    <i *ngIf="!user" class="fa {{notifications['__Anonymous'] == 1 ? 'fa-bell' : 'fa-bell-slash'}} notifications" id="__Anonymous" (click)="notificationsClick('__Anonymous')"></i>
                 </ng-template>
 
                 <ng-template ngbTabContent>
