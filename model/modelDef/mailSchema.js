@@ -99,7 +99,11 @@ module.exports.getSchema = (mongoose) => {
                 'user',
                 'read',
                 'headers'
-            ], (err, mails) => {
+            ], {
+                'sort': {
+                    'date': -1
+                }
+            },(err, mails) => {
                 if (err) {
                     reject(err);
                 } else {

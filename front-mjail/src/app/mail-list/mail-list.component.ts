@@ -336,7 +336,7 @@ export class MailListComponent implements OnInit {
                     this.updateTitle();
                 } else if (message.type === 'setInit') {
                     message.payload.mails.forEach((mail) => {
-                        this.mails.unshift(mail);
+                        this.mails.push(mail);
 
                         if (mail.user && this.users.indexOf(mail.user) === -1) {
                             this.users.push(mail.user);

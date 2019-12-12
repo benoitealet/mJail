@@ -15,12 +15,20 @@ module.exports = (model) => {
                 case 'getInit':
 
                     model.getModel('Mail').findAllSimpleMails().then((mails) => {
-                        ws.send(JSON.stringify({
-                            type: 'setInit',
-                            payload: {
-                                mails: mails
-                            }
-                        }));
+                        let delay = 0;
+
+                        do {
+                            let batch = mails.splice(0, 10);
+                            setTimeout(() => {
+                                ws.send(JSON.stringify({
+                                    type: 'setInit',
+                                    payload: {
+                                        mails: batch
+                                    }
+                                }));
+                            }, delay);
+                            delay += 100;
+                        } while(mails.length);
                     });
                     break;
 
