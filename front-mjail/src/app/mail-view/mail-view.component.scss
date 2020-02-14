@@ -12,10 +12,13 @@
 }
 
 .mailContentBody {
-    overflow: hidden;
-    word-wrap: break-word;
+    overflow: auto;
     background: white;
     padding: 0.6rem;
+}
+
+.mailContentBody * {
+  max-width: 100% !important;
 }
 
 .mailContentBody.mailContentBody-text {

@@ -3,6 +3,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, Title} from '@angular/platform-browser';
 import * as Fuse from 'fuse.js';
 import { PushNotificationsService} from 'ng-push';
+import { ActivatedRoute } from '@angular/router'
 import {forEach} from '@angular/router/src/utils/collection';
 
 @NgModule({
@@ -24,7 +25,7 @@ export class MailListComponent implements OnInit {
 
     private ws: any;
 
-    users: String[] = [''];
+    users: String[] = [];
 
     notifications: any[] = [];
 
@@ -42,9 +43,17 @@ export class MailListComponent implements OnInit {
 
     private fuseOptions: Object;
 
-    constructor(@Inject(DOCUMENT) private document, private titleService: Title, private _pushNotifications: PushNotificationsService) {
+    route: string = '';
+
+    constructor(@Inject(DOCUMENT) private document, private titleService: Title, router: ActivatedRoute, private _pushNotifications: PushNotificationsService) {
 
         this._pushNotifications.requestPermission();
+
+        this.route = router.snapshot.params.name;
+
+        if (!this.route || this.route == 'Anonymous') {
+          this.users = [''];
+        }
 
         this.wsHost = document.location.hostname + ':' + document.location.port;
 
@@ -336,16 +345,23 @@ export class MailListComponent implements OnInit {
                     this.updateTitle();
                 } else if (message.type === 'setInit') {
                     message.payload.mails.forEach((mail) => {
-                        this.mails.push(mail);
 
                         if (mail.user && this.users.indexOf(mail.user) === -1) {
-                            this.users.push(mail.user);
-                            this.notifications[mail.user] = 0;
+                            if (!this.route || mail.user == this.route) {
+                              this.users.push(mail.user);
+                              this.notifications[mail.user] = 0;
+                            }
                         }
 
                         if (mail.user) {
+                          if (!this.route  || mail.user == this.route) {
+                            this.mails.push(mail);
+                          }
                           this.notifications[mail.user] = localStorage.getItem(mail.user);
                         } else {
+                          if (!this.route || this.route == 'Anonymous') {
+                            this.mails.push(mail);
+                          }
                           this.notifications['__Anonymous'] = localStorage.getItem('__Anonymous');
                         }
                     });
@@ -417,10 +433,13 @@ export class MailListComponent implements OnInit {
 
     private updateTitle() {
 
+        if (this.route) {
+          this.currentUser = (this.route == 'Anonymous' ? '' : this.route);
+        }
         let filterUser = this.mails.filter(item => (item.user === this.currentUser || (!item.user && !this.currentUser)));
         let filterRead = filterUser.filter(item => (!item.read));
 
-        this.titleService.setTitle((this.currentUser ? this.currentUser : 'Anonymous') + ' (' + filterRead.length + '/' + filterUser.length + ')');
+        this.titleService.setTitle((this.route ? this.route : (this.currentUser ? this.currentUser : 'Anonymous')) + ' (' + filterRead.length + '/' + filterUser.length + ')');
     }
 
 
