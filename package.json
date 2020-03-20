@@ -9,6 +9,7 @@
     "mailparser-mit": "^0.6.2",
     "moment": "^2.22.2",
     "mongoose": "^5.1.1",
+    "nedb": "^1.8.0",
     "nodemailer": "^4.6.5",
     "sanitize-filename": "^1.6.1",
     "smtp-server": "^3.4.4",

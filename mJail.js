@@ -23,8 +23,16 @@ smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo, config.certTls);
 
 const webServer = require(__dirname + '/modules/WebServer.js');
 
-const model = require(__dirname + '/model/model.js');
-model.connect(config.mongoDbUrl, {
+let model = "";
+let connectParam = "";
+
+if (config.db == "mongodb") {
+    model = require(__dirname + '/model/model.js');
+} else if (config.db == "nedb") {
+    model = require(__dirname + '/model/nedb.js');
+}
+
+model.connect(config.dbPath, {
     useNewUrlParser: true
 }).then(() => {
     model.startPruneMonitor(config.pruneDays, (mailsId) => {
@@ -45,15 +53,26 @@ model.connect(config.mongoDbUrl, {
         process.exit(1);
     });
 
-
     smtpServer.onMailReceived((mail) => {
-        console.log(mail);
         model.getModel('Mail').saveMail(mail).then((mail) => {
-
             webServer.broadcast({
                 type: 'mailReceived',
                 payload: {
                     mail: mail
+                }
+            }, function (ws, user) {
+                if (ws.forceChannel) {
+                    if (ws.forceChannel == user) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    if (ws.blacklist.includes(user)) {
+                        return false;
+                    } else {
+                        return true;
+                    }
                 }
             })
         }).catch((err) => {

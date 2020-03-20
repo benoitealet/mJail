@@ -12,11 +12,17 @@ module.exports = (model) => {
         ws.on('message', (e) => {
             const data = JSON.parse(e);
             switch (data.type) {
-                case 'getInit':
+                case 'getBlacklist':
+                    ws.blacklist = data.payload;
+                    break;
 
-                    model.getModel('Mail').findAllSimpleMails().then((mails) => {
+                case 'getForceChannel':
+                    ws.forceChannel = data.payload;
+                    break;
+
+                case 'getMailsUser':
+                    model.getModel('Mail').findAllFromUser(data.payload ? data.payload : null).then((mails) => {
                         let delay = 0;
-
                         do {
                             let batch = mails.splice(0, 10);
                             setTimeout(() => {
@@ -25,11 +31,49 @@ module.exports = (model) => {
                                     payload: {
                                         mails: batch
                                     }
-                                }));
-                            }, delay);
+                                }));}, delay);
                             delay += 100;
-                        } while(mails.length);
+                        } while (mails.length);
                     });
+                    break;
+
+                case 'getInit':
+
+                    if (!ws.forceChannel) {
+                        model.getModel('Mail').findAllSimpleMails(ws.blacklist).then((mails) => {
+                            let delay = 0;
+
+                            do {
+                                let batch = mails.splice(0, 10);
+                                setTimeout(() => {
+                                    ws.send(JSON.stringify({
+                                        type: 'setInit',
+                                        payload: {
+                                            mails: batch
+                                        }
+                                    }));
+                                }, delay);
+                                delay += 100;
+                            } while (mails.length);
+                        });
+                    } else {
+                        model.getModel('Mail').findAllFromUser(ws.forceChannel).then((mails) => {
+                            let delay = 0;
+
+                            do {
+                                let batch = mails.splice(0, 10);
+                                setTimeout(() => {
+                                    ws.send(JSON.stringify({
+                                        type: 'setInit',
+                                        payload: {
+                                            mails: batch
+                                        }
+                                    }));
+                                }, delay);
+                                delay += 100;
+                            } while (mails.length);
+                        });
+                    }
                     break;
 
                 case 'setRead':
@@ -41,7 +85,7 @@ module.exports = (model) => {
                         $set: {
                             read: true
                         }
-                    }).then(() => {
+                    }, function () {
                         broadcast({
                             type: 'setRead',
                             payload: data.payload
@@ -57,7 +101,7 @@ module.exports = (model) => {
                         $set: {
                             read: false
                         }
-                    }).then(() => {
+                    }, function () {
                         broadcast({
                             type: 'setUnread',
                             payload: data.payload
@@ -65,11 +109,11 @@ module.exports = (model) => {
                     });
                     break;
                 case 'delete':
-                    model.getModel('Mail').deleteMany({
+                    model.getModel('Mail').remove({
                         _id: {
                             $in: data.payload
                         }
-                    }).then(() => {
+                    }, function () {
                         broadcast({
                             type: 'deleted',
                             payload: data.payload
@@ -83,28 +127,11 @@ module.exports = (model) => {
 
                     break;
                 case 'deleteByUser':
-
-                    let query;
-
-                    if (data.payload) {
-                        query = {
-                            user: data.payload
-                        }
-                    } else {
-                        query = {
-                            $or: [
-                                {user: {$exists: false}},
-                                {user: ''}
-                            ]
-                        }
-                    }
-                    model.getModel('Mail').find(query, ['_id']).then((mailIds) => {
-
+                    model.getModel('Mail').findAllFromUser(data.payload ? data.payload : null).then((mailIds) => {
                         mailIds.forEach((mailId) => {
                             fsExtra.remove(config.attachmentDir + path.sep + mailId._id);
                         });
-
-                        model.getModel('Mail').deleteMany(query).then(() => {
+                        model.getModel('Mail').remove({user: data.payload ? data.payload : null}, {multi: true}, function () {
                             broadcast({
                                 type: 'deletedByUser',
                                 payload: data.payload
@@ -117,7 +144,7 @@ module.exports = (model) => {
                     model.getModel('Mail').findOne({
                         _id: data.payload.id
                     }, {
-                    }).then((dbMail) => {
+                    }, function (err, dbMail) {
                         try {
                             let mail = {};
 

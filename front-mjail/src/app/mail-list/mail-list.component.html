@@ -8,6 +8,17 @@
             </a>
 
             <div class="actions pull-right form-inline" style="white-space: nowrap">
+                <div  *ngIf="!route" class="dropdown">
+                    <button title="Paramètres" class="btn btn-light dropdown-toggle" type="button" id="settings" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="fa fa-cog"></i>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="settings">
+                      <li class="dropdown-item"  (click)="userSettings(user, $event)" *ngFor="let user of blacklistUsers">
+                        {{user ? user : 'Anonymous'}}
+                        <span class="fa {{blacklist[user] == 1 ? 'fa-times' : 'fa-check'}}"></span>
+                      </li>
+                    </div>
+                </div>
 
                 <input placeholder="Search.."
                        type="text"
@@ -28,9 +39,10 @@
         </div>
 
         <ngb-tabset class="mails" id="test" type="pills" (tabChange)="userChange($event)">
-            <ngb-tab *ngFor="let user of users" title="{{user}}" id="tabUsers_{{user}}">
+            <ngb-tab *ngFor="let user of users" id="tabUsers_{{user}}">
+              <ng-container *ngIf="blacklist[user ? user : '__Anonymous'] != 1  || user == route ">
                 <ng-template ngbTabTitle>
-                    <i *ngIf="!user">Anonymous</i>
+                    <i>{{user ? user : 'Anonymous'}}</i>
                     ({{ (mails | filter : 'user' : user | filter : 'read' : false).length }}/{{ (mails | filter : 'user' : user).length }})
                     <i *ngIf="user" class="fa {{notifications[user] == 1 ? 'fa-bell' : 'fa-bell-slash'}} notifications" id="{{user}}" (click)="notificationsClick(user)"></i>
                     <i *ngIf="!user" class="fa {{notifications['__Anonymous'] == 1 ? 'fa-bell' : 'fa-bell-slash'}} notifications" id="__Anonymous" (click)="notificationsClick('__Anonymous')"></i>
@@ -71,6 +83,7 @@
                         </tbody>
                     </table>
                 </ng-template>
+              </ng-container>
             </ngb-tab>
 
         </ngb-tabset>

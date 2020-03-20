@@ -55,12 +55,14 @@ module.exports.createServer = function (httpPort, cert, routing, onWsClient) {
                 onWsClient(ws, wss.broadcast)
             });
 
-            wss.broadcast = (data) => {
+            wss.broadcast = (data, func) => {
                 let clientCount = 0;
                 wss.clients.forEach((client) => {
                     if (client.readyState === WebSocket.OPEN) {
                         clientCount++;
-                        client.send(JSON.stringify(data));
+                        if (!data.payload.mail || func(client, data.payload.mail.user) === true) {
+                            client.send(JSON.stringify(data));
+                        }
                     }
                 });
                 console.log('Broadcast to ' + clientCount + ' clients');
@@ -74,9 +76,9 @@ module.exports.createServer = function (httpPort, cert, routing, onWsClient) {
     });
 }
 
-module.exports.broadcast = (data) => {
+module.exports.broadcast = (data, func = true) => {
     if (wss) {
-        wss.broadcast(data);
+        wss.broadcast(data, func);
     } else {
         throw "Websocket is not ready";
     }

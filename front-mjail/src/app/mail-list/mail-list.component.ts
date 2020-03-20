@@ -29,6 +29,10 @@ export class MailListComponent implements OnInit {
 
     notifications: any[] = [];
 
+    blacklist: any[] = [];
+
+    blacklistUsers: String[] = [];
+
     lastNotif: any= null;
 
     lastMail: any;
@@ -54,6 +58,12 @@ export class MailListComponent implements OnInit {
         if (!this.route || this.route == 'Anonymous') {
           this.users = [''];
         }
+        if (localStorage.getItem('notifications')) {
+          this.notifications[''] = JSON.parse(localStorage.getItem('notifications'))[''];
+        }
+        if (localStorage.getItem('blacklist')) {
+          this.blacklist[''] = JSON.parse(localStorage.getItem('blacklist'))[''];
+        }
 
         this.wsHost = document.location.hostname + ':' + document.location.port;
 
@@ -77,11 +87,21 @@ export class MailListComponent implements OnInit {
     }
 
     ngOnInit() {
+        var blacklist = [];
+        var data = JSON.parse(localStorage.getItem('blacklist'));
+        for (let user in data) {
+          this.blacklistUsers.push(user);
+          this.blacklist[user] = data[user];
+          if (data[user] === 1) {
+            blacklist.push(user);
+          }
+        }
         this.titleService.setTitle('Connecting..');
         this.connect().then(() => {
+            this.sendMessage('getForceChannel', this.route);
+            this.sendMessage('getBlacklist', blacklist);
             this.sendMessage('getInit', null);
         });
-
     }
 
     applyFilter() {
@@ -241,17 +261,75 @@ export class MailListComponent implements OnInit {
     }
 
     notificationsClick(user) {
+      var notifications = {};
       if (user) {
-        if (this.notifications[user] === 0) {
+        if (this.notifications[user] === 0 || !this.notifications[user]) {
           this.notifications[user] = 1;
         } else {
           this.notifications[user] = 0;
         }
-        localStorage.setItem(user, this.notifications[user]);
+        if (!localStorage.getItem('notifications')) {
+          for (let name in this.notifications) {
+            notifications[name] = this.notifications[name];
+          }
+          localStorage.setItem('notifications', JSON.stringify(notifications));
+        } else {
+          notifications = JSON.parse(localStorage.getItem('notifications'));
+          notifications[user] = this.notifications[user];
+          localStorage.setItem('notifications', JSON.stringify(notifications))
+        }
       }
     }
 
+    userSettings(user, $event) {
+      var blacklist = {};
+      if (this.blacklist[user] === 0 || !this.blacklist[user]) {
+        if (this.currentUser == user) {
+          this.currentUser = null;
+        }
+        this.blacklist[user] = 1;
+        var newMails = [];
+        console.log(typeof null)
+        for (let index in this.mails) {
+          if (this.mails[index].user != (user ? user : null)) {
+            newMails[index] = this.mails[index];
+          }
+        }
+        this.mails = newMails;
+        for (let index in this.users) {
+          if (this.users[index] == user) {
+            this.users.splice(parseInt(index), 1);
+          }
+        }
+      } else {
+        this.blacklist[user] = 0;
+        this.users.push(user);
+        this.sendMessage('getMailsUser', user);
+      }
 
+      if (!localStorage.getItem('blacklist')) {
+        for (let name in this.blacklist) {
+          blacklist[name] = this.blacklist[name];
+        }
+        localStorage.setItem('blacklist', JSON.stringify(blacklist));
+      } else {
+        blacklist = JSON.parse(localStorage.getItem('blacklist'));
+        blacklist[user] = this.blacklist[user];
+        localStorage.setItem('blacklist', JSON.stringify(blacklist))
+      }
+
+      var payload = [];
+      for (let name in this.blacklist) {
+        if (blacklist[name] == 1) {
+          payload.push(name);
+        }
+      }
+
+      this.sendMessage('getBlacklist', payload);
+
+      //pour ne pas fermer le dropdown
+      $event.stopPropagation();
+    }
 
     onChildEvent($event) {
         switch ($event.type) {
@@ -306,43 +384,46 @@ export class MailListComponent implements OnInit {
 
                 if (message.type === 'mailReceived') {
                     let mail = message.payload.mail;
-                    this.mails.unshift(mail);
-                    if (mail.user && this.users.indexOf(mail.user) === -1) {
+                    if (!this.route || mail.user == this.route) {
+                      this.mails.unshift(mail);
+                      if (mail.user && this.users.indexOf(mail.user) === -1) {
                         this.users.push(mail.user);
                         this.notifications[mail.user] = 0;
-                    }
+                        this.blacklist[mail.user] = 0;
+                      }
 
-                    //10 secondes entre chaque notifs
-                    let diff = (new Date()).getTime() - this.lastNotif;
-                    diff = Math.floor(diff/1000) % 60;
-                    if (
-                      (this.notifications[mail.user] == 1 || (!mail.user && this.notifications['__Anonymous'] == 1) ) &&
-                      (diff > 10 || !this.lastNotif)
-                    ) {
-                      this.lastNotif = (new Date()).getTime();
-                      this._pushNotifications.create(
-                        'New Mail',
-                        {
-                          body: 'New Mail from ' + mail.from.address + ' in ' + mail.user,
-                          icon: 'assets/favicon.png',
-                        }
-                      ).subscribe(resolve => {
-                        if (resolve.event.type === 'click') {
-                          if (mail.user) {
-                            document.getElementById('tabUsers_' + mail.user).click();
+                      //10 secondes entre chaque notifs
+                      let diff = (new Date()).getTime() - this.lastNotif;
+                      diff = Math.floor(diff / 1000) % 60;
+                      if (
+                        (this.notifications[mail.user] == 1 || (!mail.user && this.notifications[''] == 1)) &&
+                        (diff > 10 || !this.lastNotif)
+                      ) {
+                        this.lastNotif = (new Date()).getTime();
+                        this._pushNotifications.create(
+                          'New Mail',
+                          {
+                            body: 'New Mail from ' + mail.from.address + ' in ' + mail.user,
+                            icon: 'assets/favicon.png',
                           }
-                          this.mails.forEach((m) => {
-                            m.selected = false;
-                          })
-                          this.lastMail = mail;
-                          this.lastMail.selected = true;
-                          this.lastMail.read = true;
-                          window.focus();
-                        }
-                      })
+                        ).subscribe(resolve => {
+                          if (resolve.event.type === 'click') {
+                            if (mail.user) {
+                              document.getElementById('tabUsers_' + mail.user).click();
+                            }
+                            this.mails.forEach((m) => {
+                              m.selected = false;
+                            })
+                            this.lastMail = mail;
+                            this.lastMail.selected = true;
+                            this.lastMail.read = true;
+                            window.focus();
+                          }
+                        })
+                      }
+                      this.applyFilter();
+                      this.updateTitle();
                     }
-                    this.applyFilter();
-                    this.updateTitle();
                 } else if (message.type === 'setInit') {
                     message.payload.mails.forEach((mail) => {
 
@@ -357,14 +438,24 @@ export class MailListComponent implements OnInit {
                           if (!this.route  || mail.user == this.route) {
                             this.mails.push(mail);
                           }
-                          this.notifications[mail.user] = localStorage.getItem(mail.user);
+                          if (localStorage.getItem('notifications')) {
+                            this.notifications[mail.user] = JSON.parse(localStorage.getItem('notifications'))[mail.user];
+                          }
+                          if (localStorage.getItem('blacklist')) {
+                            this.blacklist[mail.user] = JSON.parse(localStorage.getItem('blacklist'))[mail.user];
+                          }
                         } else {
                           if (!this.route || this.route == 'Anonymous') {
                             this.mails.push(mail);
                           }
-                          this.notifications['__Anonymous'] = localStorage.getItem('__Anonymous');
                         }
                     });
+
+                    this.users.forEach((user) => {
+                      if (this.blacklistUsers.indexOf(user) === -1) {
+                        this.blacklistUsers.push(user);
+                      }
+                    })
                     this.applyFilter();
                     this.updateTitle();
                 } else if (message.type === 'setRead') {
