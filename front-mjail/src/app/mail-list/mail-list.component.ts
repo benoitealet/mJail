@@ -98,8 +98,8 @@ export class MailListComponent implements OnInit {
         }
         this.titleService.setTitle('Connecting..');
         this.connect().then(() => {
-            this.sendMessage('getForceChannel', this.route);
-            this.sendMessage('getBlacklist', blacklist);
+            this.sendMessage('setForceChannel', this.route);
+            this.sendMessage('setBlacklist', blacklist);
             this.sendMessage('getInit', null);
         });
     }
@@ -225,7 +225,7 @@ export class MailListComponent implements OnInit {
                 if (mail.selected) {
                     //mail.read = true;
                     this.sendMessage('setRead', [
-                        mail._id
+                        mail.id
                     ]);
                 }
             }, 500);
@@ -233,11 +233,11 @@ export class MailListComponent implements OnInit {
     }
 
     selectionSetRead() {
-        let allId = this.mails.filter((m) => m.selected).map((m) => m._id);
+        let allId = this.mails.filter((m) => m.selected).map((m) => m.id);
         this.sendMessage('setRead', allId);
     }
     selectionSetUnread() {
-        let allId = this.mails.filter((m) => m.selected).map((m) => m._id);
+        let allId = this.mails.filter((m) => m.selected).map((m) => m.id);
         this.sendMessage('setUnread', allId);
     }
     deleteAll() {
@@ -245,7 +245,7 @@ export class MailListComponent implements OnInit {
         this.lastMail = null;
     }
     selectionDelete() {
-        let allId = this.mails.filter((m) => m.selected).map((m) => m._id);
+        let allId = this.mails.filter((m) => m.selected).map((m) => m.id);
         this.sendMessage('delete', allId);
         this.lastMail = null;
     }
@@ -325,7 +325,7 @@ export class MailListComponent implements OnInit {
         }
       }
 
-      this.sendMessage('getBlacklist', payload);
+      this.sendMessage('setBlacklist', payload);
 
       //pour ne pas fermer le dropdown
       $event.stopPropagation();
@@ -463,7 +463,7 @@ export class MailListComponent implements OnInit {
                     message.payload.forEach((messageId) => {
 
                         this.mails.forEach((m) => {
-                            if (m._id == messageId) {
+                            if (m.id == messageId) {
                                 m.read = true;
                             }
                         })
@@ -475,7 +475,7 @@ export class MailListComponent implements OnInit {
                     message.payload.forEach((messageId) => {
 
                         this.mails.forEach((m) => {
-                            if (m._id == messageId) {
+                            if (m.id == messageId) {
                                 m.read = false;
                             }
                         })
@@ -484,7 +484,7 @@ export class MailListComponent implements OnInit {
                     this.updateTitle();
                 } else if (message.type === 'deleted') {
                     this.mails = this.mails.filter((m) => {
-                        return message.payload.indexOf(m._id) === -1
+                        return message.payload.indexOf(m.id) === -1
                     })
                     this.applyFilter();
                     this.updateTitle();

@@ -62,7 +62,7 @@ export class MailViewComponent implements OnInit {
 
     deliverMail() {
         let mailData = {
-            id: this.mail._id,
+            id: this.mail.id,
             to: this.mail.to ? this.mail.to.filter((to) => to.deliveryEnabled) : [],
             cc: this.mail.cc ? this.mail.cc.filter((cc) => cc.deliveryEnabled) : [],
             bcc: this.mail.bcc ? this.mail.bcc.filter((bcc) => bcc.deliveryEnabled) : []
@@ -79,7 +79,7 @@ export class MailViewComponent implements OnInit {
                 cancel = true;
             }
         }
-        
+
         if(!cancel && (mailData.to.length + mailData.cc.length + mailData.bcc.length === 0)) {
             alert('No recipient provided');
             cancel = true;

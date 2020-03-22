@@ -4,3 +4,6 @@
 /test/
 /config/config.json
 /.idea
+/attachments
+database.sqlite
+public

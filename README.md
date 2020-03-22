@@ -2,7 +2,7 @@
 mail jail, smtp sandbox for web developers
 
 Prerequisites:
-mongodb, yarn
+yarn
 
 Config:
 Edit config/config.json

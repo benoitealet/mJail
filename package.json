@@ -8,11 +8,11 @@
     "fs-extra": "^6.0.1",
     "mailparser-mit": "^0.6.2",
     "moment": "^2.22.2",
-    "mongoose": "^5.1.1",
-    "nedb": "^1.8.0",
     "nodemailer": "^4.6.5",
     "sanitize-filename": "^1.6.1",
+    "sequelize": "^5.21.5",
     "smtp-server": "^3.4.4",
+    "sqlite3": "^4.1.1",
     "ws": "^5.1.1"
   },
   "devDependencies": {

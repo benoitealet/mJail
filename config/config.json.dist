@@ -8,7 +8,11 @@
     "certTls": null,
     "smtpMaxSizeKo": 102400,
     "httpPort": 8080,
-    "mongoDbUrl": "mongodb://labcms/mjail",
+    "database": {
+        "dialect": "sqlite",
+        "storage": "database.sqlite",
+        "logging": true
+    },
     "attachmentDir": "attachments", 
 
     "smtpClient": {

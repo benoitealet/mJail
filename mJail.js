@@ -23,65 +23,60 @@ smtpServer.createServer(config.smtpPort, config.smtpMaxSizeKo, config.certTls);
 
 const webServer = require(__dirname + '/modules/WebServer.js');
 
-let model = "";
-let connectParam = "";
+const database = require(__dirname + '/model/model.js').connect(config);
+(async () => {
+    await Promise.all([
+        database.Models.Address.sync(),
+        database.Models.Attachment.sync(),
+        database.Models.Header.sync(),
+        database.Models.Mail.sync(),
+    ]);
+})();
 
-if (config.db == "mongodb") {
-    model = require(__dirname + '/model/model.js');
-} else if (config.db == "nedb") {
-    model = require(__dirname + '/model/nedb.js');
-}
 
-model.connect(config.dbPath, {
-    useNewUrlParser: true
-}).then(() => {
-    model.startPruneMonitor(config.pruneDays, (mailsId) => {
-        webServer.broadcast({
-            type: 'deleted',
-            payload: mailsId
-        })
-    });
+webServer
+    .createServer(
+        config.httpPort,
+        config.cert,
+        require('./router.js')(config, database.Models),
+        require('./controller/websocketController.js')(database.Models)
+    ).catch((e) => {
+    console.log(e);
+    process.exit(1);
+});
 
-    webServer
-        .createServer(
-            config.httpPort,
-            config.cert,
-            require('./router.js')(config, model),
-            require('./controller/websocketController.js')(model)
-        ).catch((e) => {
-        console.log(e);
-        process.exit(1);
-    });
-
-    smtpServer.onMailReceived((mail) => {
-        model.getModel('Mail').saveMail(mail).then((mail) => {
-            webServer.broadcast({
-                type: 'mailReceived',
-                payload: {
-                    mail: mail
-                }
-            }, function (ws, user) {
-                if (ws.forceChannel) {
-                    if (ws.forceChannel == user) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } else {
-                    if (ws.blacklist.includes(user)) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-            })
-        }).catch((err) => {
-            console.log('Error while accepting mail: ', err);
-        });
-    });
+smtpServer.onMailReceived(async (mail) => {
+    const createdMail = await database.Models.Mail.getRepository().saveMail(mail, config.attachmentDir);
+    console.log(createdMail);
+    webServer.broadcast({
+        type: 'mailReceived',
+        payload: {
+            mail: createdMail
+        }
+    }, function (ws, user) {
+        // callback function executed on the broadcast loop to check if this client should be warned
+        if (ws.forceChannel) {
+            if (ws.forceChannel == user) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (ws.blacklist.includes(user)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    })
 
 });
 
-
+// database.startPruneMonitor(config.pruneDays, (mailsId) => {
+//     webServer.broadcast({
+//         type: 'deleted',
+//         payload: mailsId
+//     })
+// });
 
 

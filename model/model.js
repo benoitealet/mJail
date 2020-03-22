@@ -1,69 +1,214 @@
-let models = [];
+const {Sequelize, Model, DataTypes, Op} = require('sequelize');
+const moment = require('moment');
 
-module.exports.connect = (mongoDbUrl) => {
-    return new Promise((resolve, reject) => {
-        const mongoose = require('mongoose');
+function connect(config) {
 
-        //Set up default mongoose connection
+    const sequelize = new Sequelize({
+        ...config.database,
+        define: {
+            timestamps: false
+        }
 
-        mongoose.connect(mongoDbUrl, {
-            useNewUrlParser: true
-        }).then(resolve);
+    });
 
-
-        // Get Mongoose to use the global promise library
-        mongoose.Promise = global.Promise;
-        //Get the default connection
-
-        let db = mongoose.connection;
-
-        //Bind connection to error event (to get notification of connection errors)
-        db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-        models['Mail'] = mongoose.model('Mail', require('./modelDef/mailSchema.js').getSchema(mongoose));
-    })
-}
-
-module.exports.getModel = function (modelName) {
-    if (models[modelName]) {
-        return models[modelName];
-    } else {
-        return null;
+    class Address extends Model {
     }
-}
+
+    class Mail extends Model {
+    }
+
+    class Header extends Model {
+    }
+
+    class Attachment extends Model {
+    }
+
+    Address.init({
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        address: {
+            type: DataTypes.STRING(512),
+            allowNull: false,
+        },
+        name: {
+            type: DataTypes.STRING(512),
+            allowNull: true,
+        },
+        to: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        from: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        cc: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
+        bcc: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        }
+    }, {
+        sequelize
+    });
+
+    Mail.init({
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        messageId: {
+            type: DataTypes.STRING(512),
+            allowNull: false,
+        },
+        date: {
+            type: DataTypes.DATE(),
+            allowNull: false,
+        },
+        subject: {
+            type: Sequelize.STRING(512),
+            allowNull: false,
+        },
+        html: {
+            type: Sequelize.TEXT,
+            allowNull: true,
+        },
+        text: {
+            type: Sequelize.TEXT,
+            allowNull: true,
+        },
+        user: {
+            type: Sequelize.STRING(64),
+            allowNull: true,
+        },
+        read: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+
+    }, {
+        sequelize
+    });
 
 
-module.exports.startPruneMonitor = function (pruneDays, onMailDeleted) {
+    Header.init({
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        mailId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        name: {
+            type: DataTypes.STRING(64),
+            allowNull: false,
+        },
+        value: {
+            type: DataTypes.STRING(512),
+            allowNull: true,
+        }
+    }, {
+        sequelize
+    });
 
-    if (pruneDays > 0) {
-        setInterval(() => {
+    Attachment.init({
+        mailId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            primaryKey: true,
+        },
+        contentId: {
+            type: DataTypes.STRING(128),
+            allowNull: true,
+            primaryKey: true,
+        },
+        contentType: {
+            type: DataTypes.STRING(128),
+            allowNull: true,
+        },
+        contentDisposition: {
+            type: DataTypes.STRING(128),
+            allowNull: true,
+        },
 
-            models['Mail'].find({
-                date: {
-                    '$lt': require('moment')().subtract(pruneDays, 'days')
-                }
-            }, '_id', function(err, docs) {
-                if(err) {
-                    console.log(err);
-                    process.exit(1);
-                }
+        fileName: {
+            type: DataTypes.STRING(128),
+            allowNull: true,
+        },
+        length: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        }
 
-                let deleted = docs.map(d => d._id);
+    }, {
+        sequelize
+    });
 
-                models['Mail'].deleteMany({
-                    _id: {
-                        $in: deleted
-                    }
-                }, (err) => {
-                    if(err) {
-                        console.log(err);
+    Mail.hasOne(Address, {as: 'from', sourceKey: 'id', foreignKey: 'from', onDelete: 'cascade'});
+    Mail.hasMany(Address, {as: 'to', sourceKey: 'id', foreignKey: 'to', onDelete: 'cascade'});
+    Mail.hasMany(Address, {as: 'cc', sourceKey: 'id', foreignKey: 'cc', onDelete: 'cascade'});
+    Mail.hasMany(Address, {as: 'bcc', sourceKey: 'id', foreignKey: 'bcc', onDelete: 'cascade'});
+    Mail.hasMany(Header, {as: 'header', sourceKey: 'id', foreignKey: 'mailId', onDelete: 'cascade'});
+    Mail.hasMany(Attachment, {as: 'attachments', sourceKey: 'id', foreignKey: 'mailId', onDelete: 'cascade'});
+
+    const models = {
+        Address,
+        Mail,
+        Header,
+        Attachment,
+    }
+
+    Mail.getRepository = () => {
+        return require(__dirname + '/repository/mailRepository.js').getRepository(models, config);
+    }
+    Attachment.getRepository = () => {
+        return require(__dirname + '/repository/attachmentRepository.js').getRepository(models, config);
+    }
+
+
+    const startPruneMonitor = function (pruneDays, onMailDeleted) {
+
+        if (pruneDays > 0) {
+            setInterval(async () => {
+
+                const deleteIdList = await Mail.findAll({
+                    attributes: ['id'],
+                    where: {
+                        date: {
+                            [Op.lt]: moment().subtract(pruneDays, 'days')
+                        }
                     }
                 });
-                onMailDeleted(deleted);
-                console.log('Pruned '+ deleted.length + ' mails');
-            });
 
+                await Mail.destroy({
+                    where: {
+                        id: deleteIdList
+                    }
+                });
 
-        }, 1000);
+                onMailDeleted(deleteIdList);
+                console.log('Pruned ' + deleteIdList.length + ' mails');
+
+            }, 1000);
+        }
+    };
+
+    return {
+        Models: models,
+        startPruneMonitor
     }
 }
+
+module.exports = {
+    connect
+}
+
