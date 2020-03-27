@@ -22,7 +22,7 @@ module.exports = (model) => {
                     break;
 
                 case 'getMailsUser': {
-                    const mails = await model.Mail.findAllFromUser(data.payload ? data.payload : null);
+                    const mails = await model.Mail.getRepository().findAllFromUser(data.payload ? data.payload : null);
 
                     let delay = 0;
                     do {
@@ -45,7 +45,7 @@ module.exports = (model) => {
                     if (!ws.forceChannel) {
                         mails = await model.Mail.getRepository().findAllSimpleMails(ws.blacklist);
                     } else {
-                        mails = await model.Mail.findAllFromUser(ws.forceChannel);
+                        mails = await model.Mail.getRepository().findAllFromUser(ws.forceChannel);
                     }
 
                     let delay = 0;

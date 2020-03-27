@@ -101,14 +101,14 @@ module.exports.getRepository = function (models, config) {
 
                 try {
                     await fs.mkdir([config.attachmentDir, sanitize(createdMail.id.toString())].join(path.sep));
+                    allCopyPromises.push(fs.writeFile([
+                        config.attachmentDir,
+                        sanitize(createdMail.id.toString()),
+                        sanitize(attachment.contentId.toString())
+                    ].join(path.sep), attachment.content));
                 } catch (e) {
                     // allready exists, ignore. If other error, writeFile will fail
                 }
-                allCopyPromises.push(fs.writeFile([
-                    config.attachmentDir,
-                    sanitize(createdMail.id.toString()),
-                    sanitize(attachment.contentId.toString())
-                ].join(path.sep), attachment.content));
             }
             await Promise.all(allCopyPromises);
         }
