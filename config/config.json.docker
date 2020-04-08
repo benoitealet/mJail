@@ -7,7 +7,7 @@
     "cert": null,
     "certTls": {
         "key": "./dockerResources/docker.key",
-        "cert": "./dockerResources/docker/docker.cert"
+        "cert": "./dockerResources/docker.cert"
     },
     "smtpMaxSizeKo": 102400,
     "httpPort": 8080,
