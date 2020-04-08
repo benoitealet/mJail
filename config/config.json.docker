@@ -1,10 +1,9 @@
 {
     "smtpPort": 1025,
-    "certINACTIF": {
-        "key": "../mJailCert/labcms.key",
-        "cert": "../mJailCert/labcms.cert"
+    "cert": {
+        "key": "./dockerResources/docker.key",
+        "cert": "./dockerResources/docker.cert"
     },
-    "cert": null,
     "certTls": {
         "key": "./dockerResources/docker.key",
         "cert": "./dockerResources/docker.cert"
