@@ -7,11 +7,11 @@ const config = require('../config/config.json');
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport(config.smtpClient);
 
-module.exports = (model) => {
+module.exports = (database) => {
     return (ws, broadcast) => {
         ws.on('message', async (e) => {
             const data = JSON.parse(e);
-
+            const t = await database.sequelize.transaction();
             switch (data.type) {
                 case 'setBlacklist':
                     ws.blacklist = data.payload;
@@ -22,7 +22,7 @@ module.exports = (model) => {
                     break;
 
                 case 'getMailsUser': {
-                    const mails = await model.Mail.getRepository().findAllFromUser(data.payload ? data.payload : null);
+                    const mails = await database.Models.Mail.getRepository().findAllFromUser(data.payload ? data.payload : null);
 
                     let delay = 0;
                     do {
@@ -43,9 +43,9 @@ module.exports = (model) => {
                 case 'getInit': {
                     let mails;
                     if (!ws.forceChannel) {
-                        mails = await model.Mail.getRepository().findAllSimpleMails(ws.blacklist);
+                        mails = await database.Models.Mail.getRepository().findAllSimpleMails(ws.blacklist);
                     } else {
-                        mails = await model.Mail.getRepository().findAllFromUser(ws.forceChannel);
+                        mails = await database.Models.Mail.getRepository().findAllFromUser(ws.forceChannel);
                     }
 
                     let delay = 0;
@@ -66,7 +66,7 @@ module.exports = (model) => {
                     break;
 
                 case 'setRead': {
-                    await model.Mail.update({
+                    await database.Models.Mail.update({
                         read: true
                     }, {
                         where: {
@@ -82,7 +82,7 @@ module.exports = (model) => {
                     break;
 
                 case 'setUnread': {
-                    await model.Mail.update({
+                    await database.Models.Mail.update({
                         read: false
                     }, {
                         where: {
@@ -91,14 +91,14 @@ module.exports = (model) => {
                     });
 
                     broadcast({
-                        type: 'setRead',
+                        type: 'setUnread',
                         payload: data.payload
                     });
                 }
                     break;
 
                 case 'delete': {
-                    await model.Mail.destroy({
+                    await database.Models.Mail.destroy({
                         where: {
                             id: data.payload
                         }
@@ -115,12 +115,12 @@ module.exports = (model) => {
                     break;
 
                 case 'deleteByUser': {
-                    const mailIds = await model.Mail.getRepository().findAllFromUser(data.payload ? data.payload : null);
+                    const mailIds = await database.Models.Mail.getRepository().findAllFromUser(data.payload ? data.payload : null);
                     for (const mailId of mailIds) {
                         fsExtra.remove(config.attachmentDir + path.sep + mailId.id);
                     }
 
-                    await model.Mail.destroy({
+                    await database.Models.Mail.destroy({
                         where: {
                             user: data.payload ? data.payload : null
                         }
@@ -134,10 +134,17 @@ module.exports = (model) => {
                     break;
 
                 case 'deliverMail': {
-                    const dbMail = model.Model.findOne({
+                    const dbMail = await database.Models.Mail.findOne({
                         where: {
                             id: data.payload.id
-                        }
+                        },
+                        include: [
+                            'from',
+                            'to',
+                            'cc',
+                            'bcc',
+                            'attachments'
+                        ]
                     });
                     try {
                         let mail = {};
@@ -197,7 +204,7 @@ module.exports = (model) => {
                                     cid: a.contentId,
                                     path: [
                                         config.attachmentDir,
-                                        dbMail._id.toString(),
+                                        dbMail.id,
                                         a.contentId.toString()
                                     ].join(path.sep)
                                 });
@@ -218,6 +225,7 @@ module.exports = (model) => {
                 default:
                     console.log('Unknown message type received: ', data.type);
             }
+            t.commit();
         });
     }
 }

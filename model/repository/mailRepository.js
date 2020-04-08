@@ -13,6 +13,7 @@ module.exports.getRepository = function (models, config) {
                 'cc',
                 'bcc',
                 'attachments',
+                'header'
             ],
             order: [
                 ['date', 'DESC']
@@ -31,6 +32,7 @@ module.exports.getRepository = function (models, config) {
                 'cc',
                 'bcc',
                 'attachments',
+                'header'
             ],
             where: {
                 user: user
@@ -49,66 +51,69 @@ module.exports.getRepository = function (models, config) {
         const createdMail = await models.Mail.create(mail);
 
         if (mail.from) {
-            models.Address.create({
+            await models.Address.create({
                 ...mail.from,
                 from: createdMail.id
             });
         }
 
         if (mail.to) {
-            mail.to.forEach(adr => {
-                models.Address.create({
+            await Promise.all(mail.to.map(adr => {
+                return models.Address.create({
                     ...adr,
                     to: createdMail.id
                 })
-            });
+            }));
         }
 
         if (mail.cc) {
-            mail.cc.forEach(adr => {
-                models.Address.create({
+            await Promise.all(mail.cc.map(adr => {
+                return models.Address.create({
                     ...adr,
                     cc: createdMail.id
                 })
-            });
+            }));
         }
 
         if (mail.bcc) {
-            mail.bcc.forEach(adr => {
+            await Promise.all(mail.bcc.map(adr => {
                 models.Address.create({
                     ...adr,
                     bcc: createdMail.id
                 })
-            });
+            }));
         }
 
         if (mail.headers) {
-            mail.headers.forEach(h => {
+            await Promise.all(mail.headers.map(h => {
                 models.Header.create({
                     ...h,
                     mailId: createdMail.id
                 })
-            });
+            }));
         }
 
         if (mail.attachments) {
             const allCopyPromises = [];
             for (const attachment of mail.attachments) {
-                await models.Attachment.create({
-                    ...attachment,
-                    mailId: createdMail.id
-                });
+                allCopyPromises.push(
+                    models.Attachment.create({
+                        ...attachment,
+                        mailId: createdMail.id
+                    })
+                );
 
                 try {
                     await fs.mkdir([config.attachmentDir, sanitize(createdMail.id.toString())].join(path.sep));
-                    allCopyPromises.push(fs.writeFile([
-                        config.attachmentDir,
-                        sanitize(createdMail.id.toString()),
-                        sanitize(attachment.contentId.toString())
-                    ].join(path.sep), attachment.content));
                 } catch (e) {
-                    // allready exists, ignore. If other error, writeFile will fail
+                    // folder allready exists, ignore mkdir. If other error, writeFile will fail
                 }
+
+                allCopyPromises.push(fs.writeFile([
+                    config.attachmentDir,
+                    sanitize(createdMail.id.toString()),
+                    sanitize(attachment.contentId.toString())
+                ].join(path.sep), attachment.content));
             }
             await Promise.all(allCopyPromises);
         }
@@ -122,6 +127,7 @@ module.exports.getRepository = function (models, config) {
                 'cc',
                 'bcc',
                 'attachments',
+                'header'
             ],
         });
     }

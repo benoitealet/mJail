@@ -289,7 +289,7 @@ export class MailListComponent implements OnInit {
         }
         this.blacklist[user] = 1;
         var newMails = [];
-        console.log(typeof null)
+
         for (let index in this.mails) {
           if (this.mails[index].user != (user ? user : null)) {
             newMails[index] = this.mails[index];
@@ -334,7 +334,6 @@ export class MailListComponent implements OnInit {
     onChildEvent($event) {
         switch ($event.type) {
             case 'deliverMail':
-                console.log('send deliverMail via ws');
                 this.sendMessage('deliverMail', $event.mailData);
                 break;
 

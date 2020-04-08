@@ -39,44 +39,52 @@ webServer
         config.httpPort,
         config.cert,
         require('./router.js')(config, database.Models),
-        require('./controller/websocketController.js')(database.Models)
+        require('./controller/websocketController.js')(database)
     ).catch((e) => {
     console.log(e);
     process.exit(1);
 });
 
 smtpServer.onMailReceived(async (mail) => {
-    const createdMail = await database.Models.Mail.getRepository().saveMail(mail, config.attachmentDir);
-    console.log(createdMail);
-    webServer.broadcast({
-        type: 'mailReceived',
-        payload: {
-            mail: createdMail
-        }
-    }, function (ws, user) {
-        // callback function executed on the broadcast loop to check if this client should be warned
-        if (ws.forceChannel) {
-            if (ws.forceChannel == user) {
-                return true;
-            } else {
-                return false;
+    const t = await database.sequelize.transaction();
+
+    try {
+        const createdMail = await database.Models.Mail.getRepository().saveMail(mail, config.attachmentDir);
+
+        t.commit();
+        webServer.broadcast({
+            type: 'mailReceived',
+            payload: {
+                mail: createdMail
             }
-        } else {
-            if (ws.blacklist.includes(user)) {
-                return false;
+        }, function (ws, user) {
+            // callback function executed on the broadcast loop to check if this client should be warned
+            if (ws.forceChannel) {
+                if (ws.forceChannel == user) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
-                return true;
+                if (ws.blacklist.includes(user)) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
-        }
-    })
+        });
+    } catch(e) {
+        console.log(e);
+        t.rollback();
+    }
 
 });
 
-// database.startPruneMonitor(config.pruneDays, (mailsId) => {
-//     webServer.broadcast({
-//         type: 'deleted',
-//         payload: mailsId
-//     })
-// });
+database.startPruneMonitor(config.pruneDays, (mailsId) => {
+    webServer.broadcast({
+        type: 'deleted',
+        payload: mailsId
+    })
+});
 
 

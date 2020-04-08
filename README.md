@@ -5,7 +5,8 @@ Prerequisites:
 yarn
 
 Config:
-Edit config/config.json
+Copy config/config.json.dist to config.config.json
+Edit config/config.json (See config section)
 
 Start:
 in root folder:

@@ -18,13 +18,12 @@ function onData(maxSmtpSizeKo) {
         let sumData = maxSmtpSizeKo;
         let discard = false;
 
-        let mailparser = new MailParser({
-        });
+        let mailparser = new MailParser({});
 
         stream.on('data', (data) => {
-            if(sumData > maxSmtpSizeKo * 1024) {
-                if(!discard) {
-                    console.log('Discarded mail after total smtp data:', Math.floor(sumData/1024), 'Kb');
+            if (sumData > maxSmtpSizeKo * 1024) {
+                if (!discard) {
+                    console.log('Discarded mail after total smtp data:', Math.floor(sumData / 1024), 'Kb');
                     discard = true;
                     stream.end();
                 }
@@ -34,18 +33,18 @@ function onData(maxSmtpSizeKo) {
             }
         });
         stream.on('end', () => {
-            if(!discard) {
+            if (!discard) {
                 mailparser.end();
                 callback();
             } else {
-                let err = new Error('Message exceeds fixed maximum message size ('+maxSmtpSizeKo+' Kb)' );
+                let err = new Error('Message exceeds fixed maximum message size (' + maxSmtpSizeKo + ' Kb)');
                 err.responseCode = 552;
                 return callback(err);
             }
         });
 
         mailparser.on('end', (mail) => {
-            if(!discard) {
+            if (!discard) {
                 broadcastListeners(mail, session);
             }
         });
@@ -59,10 +58,10 @@ function broadcastListeners(mail, session) {
             messageId: mail.messageId,
             date: mail.date,
             subject: mail.subject,
-            from: (mail.from && mail.from[0])?{
+            from: (mail.from && mail.from[0]) ? {
                 address: mail.from[0] ? mail.from[0].address : null,
                 name: mail.from[0] ? mail.from[0].mail : null
-            }:null,
+            } : null,
             to: mail.to ? mail.to.map(t => {
                 return {
                     address: t.address,
@@ -93,13 +92,13 @@ function broadcastListeners(mail, session) {
                     content: a.content
                 }
             }) : null,
-            headers: Object.keys(mail.headers)
-                    .map(key => {
-                        return {
-                            name: key,
-                            value: mail.headers[key]
-                        }
-                    })
+            header: Object.keys(mail.headers)
+                .map(key => {
+                    return {
+                        name: key,
+                        value: mail.headers[key]
+                    }
+                })
             ,
             user: session.user
         })
@@ -119,19 +118,17 @@ module.exports.createServer = (smtpPort, maxSmtpSizeKo, cert) => {
         maxAllowedUnauthenticatedCommands: 50000
     };
 
-    if(cert) {
+    if (cert) {
         smtpConfig.secure = cert.ssl;
         smtpConfig.key = fs.readFileSync(cert.key);
         smtpConfig.cert = fs.readFileSync(cert.cert);
         smtpConfig.rejectUnauthorized = false;
-
-
     }
 
     const smtpServer = new SMTPServer(smtpConfig);
 
     smtpServer.listen(smtpPort);
-    console.log('SMTP Listen on port', smtpPort, 'security:', cert?(cert.ssl?'ssl':'tls'):'none');
+    console.log('SMTP Listen on port', smtpPort, 'security:', cert ? (cert.ssl ? 'ssl' : 'tls') : 'none');
 
     smtpServer.on('error', (error) => {
         console.log('ERROR');

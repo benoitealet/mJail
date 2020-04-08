@@ -1,5 +1,6 @@
 const {Sequelize, Model, DataTypes, Op} = require('sequelize');
 const moment = require('moment');
+const uuid = require('uuid/v4');
 
 function connect(config) {
 
@@ -59,9 +60,9 @@ function connect(config) {
 
     Mail.init({
         id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
+            type: DataTypes.UUIDV4,
+            defaultValue: () => uuid(),
+            primaryKey: true
         },
         messageId: {
             type: DataTypes.STRING(512),
@@ -105,7 +106,7 @@ function connect(config) {
             autoIncrement: true
         },
         mailId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUIDV4,
             allowNull: false,
         },
         name: {
@@ -204,7 +205,8 @@ function connect(config) {
 
     return {
         Models: models,
-        startPruneMonitor
+        startPruneMonitor,
+        sequelize
     }
 }
 
