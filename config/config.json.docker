@@ -5,12 +5,16 @@
         "cert": "../mJailCert/labcms.cert"
     },
     "cert": null,
-    "certTls": null,
+    "certTls": {
+        "key": "./dockerResources/docker.key",
+        "cert": "./dockerResources/docker/docker.cert"
+    },
     "smtpMaxSizeKo": 102400,
     "httpPort": 8080,
     "database": {
         "dialect": "sqlite",
         "storage": "database.sqlite",
+        "logging": true
     },
     "attachmentDir": "attachments", 
 

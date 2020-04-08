@@ -5,10 +5,7 @@
         "cert": "../mJailCert/labcms.cert"
     },
     "cert": null,
-    "certTls": {
-        "key": "./dockerResources/docker.key",
-        "cert": "./dockerResources/docker/docker.cert"
-    },
+    "certTls": null,
     "smtpMaxSizeKo": 102400,
     "httpPort": 8080,
     "database": {
