@@ -252,7 +252,7 @@ export class MailListComponent implements OnInit {
 
     userChange($event) {
         this.lastMail = null;
-        this.currentUser = $event.nextId.split('_')[1];
+        this.currentUser = $event.nextId.split('tabUsers_')[1];
         this.mails.forEach((m) => {
             m.selected = false;
         });
