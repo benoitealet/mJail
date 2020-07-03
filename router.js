@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-module.exports = (config, database) => (app) => {
+module.exports = (config, models) => (app) => {
 
     app.get('/getAttachment/:mailId/:contentId', async (req, res) => {
         let mailId = req.params.mailId;
         let contentId = req.params.contentId;
 
-        const attachment = await database.Models.Attachment.getRepository().findAttachmentInfo(mailId, contentId);
+        const attachment = await models.Attachment.getRepository().findAttachmentInfo(mailId, contentId);
         try {
             if (attachment) {
                 res.setHeader("content-type", attachment.contentType);
