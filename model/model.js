@@ -180,7 +180,6 @@ function connect(config) {
 
         if (pruneDays > 0) {
             setInterval(async () => {
-
                 const deleteIdList = await Mail.findAll({
                     attributes: ['id'],
                     where: {
@@ -192,12 +191,14 @@ function connect(config) {
 
                 await Mail.destroy({
                     where: {
-                        id: deleteIdList
+                        id: deleteIdList.map(k => k.id)
                     }
                 });
 
                 onMailDeleted(deleteIdList);
-                console.log('Pruned ' + deleteIdList.length + ' mails');
+                if(deleteIdList.length) {
+                    console.log('Pruned ' + deleteIdList.length + ' mails');
+                }
 
             }, 1000);
         }
