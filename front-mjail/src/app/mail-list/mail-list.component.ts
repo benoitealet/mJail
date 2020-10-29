@@ -246,6 +246,11 @@ export class MailListComponent implements OnInit {
     }
     selectionDelete() {
         let allId = this.mails.filter((m) => m.selected).map((m) => m.id);
+        allId.map((id) => {
+          if (this.lastMail && this.lastMail.id == id) {
+            this.lastMail = null;
+          }
+        });
         this.sendMessage('delete', allId);
         this.lastMail = null;
     }
@@ -303,7 +308,9 @@ export class MailListComponent implements OnInit {
         }
       } else {
         this.blacklist[user] = 0;
-        this.users.push(user);
+        if (!this.users.includes(user)) {
+          this.users.push(user);
+        }
         this.sendMessage('getMailsUser', user);
       }
 
@@ -443,6 +450,9 @@ export class MailListComponent implements OnInit {
                           if (localStorage.getItem('blacklist')) {
                             this.blacklist[mail.user] = JSON.parse(localStorage.getItem('blacklist'))[mail.user];
                           }
+                          if (!this.blacklistUsers.includes(mail.user)) {
+                            this.blacklistUsers.push(mail.user);
+                          }
                         } else {
                           if (!this.route || this.route == 'Anonymous') {
                             this.mails.push(mail);
@@ -482,6 +492,11 @@ export class MailListComponent implements OnInit {
                     });
                     this.updateTitle();
                 } else if (message.type === 'deleted') {
+                    message.payload.map((m) => {
+                      if (this.lastMail && this.lastMail.id == m) {
+                        this.lastMail = null
+                      }
+                    })
                     this.mails = this.mails.filter((m) => {
                         return message.payload.indexOf(m.id) === -1
                     })
