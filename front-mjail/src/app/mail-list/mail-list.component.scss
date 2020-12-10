@@ -123,6 +123,14 @@ td ul li {
     margin: 0px;
 }
 
+.route-link {
+  color: white;
+}
+
+.route-link:hover {
+  color: black;
+}
+
 //les mails de contrex mettent une bordure à cause d'une règle css sur les "a"
 .nav-link {
   border-bottom: none!important;

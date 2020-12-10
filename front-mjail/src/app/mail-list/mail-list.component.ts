@@ -49,7 +49,11 @@ export class MailListComponent implements OnInit {
 
     route: string = '';
 
+    baseUrl: string = '';
+
     constructor(@Inject(DOCUMENT) private document, private titleService: Title, router: ActivatedRoute, private _pushNotifications: PushNotificationsService) {
+
+        this.baseUrl = location.origin;
 
         this._pushNotifications.requestPermission();
 
@@ -84,6 +88,16 @@ export class MailListComponent implements OnInit {
                 "to.name",
             ]
         };
+    }
+
+    copyLink(val: string) {
+      document.addEventListener('copy', (e: ClipboardEvent) => {
+        e.clipboardData.setData('text/plain', (val));
+        e.preventDefault();
+        document.removeEventListener('copy', null);
+      });
+      document.execCommand('copy');
+      alert('lien copié dans le presse papier');
     }
 
     ngOnInit() {

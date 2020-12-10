@@ -3,7 +3,7 @@
 
 
         <div id="headerBar">
-            <a routerLink="/" class="logo pull-left">
+            <a routerLink="{{!route ? '/' : '/' + route}}" class="logo pull-left">
                 <span>Ɱ</span>ail
             </a>
 
@@ -51,6 +51,12 @@
                 <ng-template ngbTabContent>
                     <table class="table">
                         <thead>
+                            <tr *ngIf="!route">
+                              <th colspan="5">
+                                <button class="btn btn-light btn-sm" (click)="copyLink(baseUrl + '/#/' + (currentUser ? currentUser : 'Anonymous'))">Copier le lien</button>
+                                <a class="route-link" routerLink="/{{currentUser ? currentUser: 'Anonymous'}}"> {{baseUrl}}/#/{{currentUser ? currentUser : 'Anonymous'}}</a>
+                              </th>
+                            </tr>
                             <tr>
                                 <th>Subject</th>
                                 <th></th>
