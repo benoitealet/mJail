@@ -13,7 +13,7 @@
                       <i class="fa fa-cog"></i>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="settings" style="height:200px;overflow-y: auto">
-                      <li class="dropdown-item"  (click)="userSettings(user, $event)" *ngFor="let user of blacklistUsers">
+                      <li class="dropdown-item"  (click)="userSettings(user, $event)" *ngFor="let user of blacklistUsers.sort()">
                         {{user ? user : 'Anonymous'}}
                         <span class="fa {{blacklist[user] == 1 ? 'fa-times' : 'fa-check'}}"></span>
                       </li>
