@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnInit, Input, Output, Inject} from '@angular/core';
-import {DOCUMENT} from '@angular/platform-browser';
+import {DOCUMENT} from '@angular/common';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 import * as EmailValidator from 'email-validator';

@@ -5,7 +5,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 
-import {AngularFontAwesomeModule} from 'angular-font-awesome';
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 import {MailListComponent} from './mail-list/mail-list.component';
@@ -32,8 +32,8 @@ import {SafePipe} from './shared/pipe/safe.pipe';
         BrowserModule,
         AppRoutingModule,
         BrowserAnimationsModule,
-        AngularFontAwesomeModule,
-        NgbModule.forRoot()
+        FontAwesomeModule,
+        NgbModule
     ],
     exports: [
     ],

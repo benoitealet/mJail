@@ -1,10 +1,11 @@
 import {NgModule, Component, OnInit, Inject, HostListener, Input} from '@angular/core';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import {DOCUMENT, Title} from '@angular/platform-browser';
-import * as Fuse from 'fuse.js';
+import {Title} from '@angular/platform-browser';
+import {DOCUMENT} from '@angular/common';
+import Fuse from 'fuse.js';
 import { PushNotificationsService} from 'ng-push';
-import { ActivatedRoute } from '@angular/router'
-import {forEach} from '@angular/router/src/utils/collection';
+import { ActivatedRoute } from '@angular/router';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
 
 @NgModule({
     imports: [NgbModule]
@@ -50,6 +51,8 @@ export class MailListComponent implements OnInit {
     route: string = '';
 
     baseUrl: string = '';
+
+    faCog = faCog;
 
     constructor(@Inject(DOCUMENT) private document, private titleService: Title, router: ActivatedRoute, private _pushNotifications: PushNotificationsService) {
 

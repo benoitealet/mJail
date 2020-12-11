@@ -2,7 +2,7 @@
     <div class="panelLeft col-sm-6">
 
 
-        <div id="headerBar">
+        <div id="headerBar" class="row">
             <a routerLink="{{!route ? '/' : '/' + route}}" class="logo pull-left">
                 <span>Ɱ</span>ail
             </a>
@@ -10,7 +10,7 @@
             <div class="actions pull-right form-inline" style="white-space: nowrap">
                 <div  *ngIf="!route" class="dropdown">
                     <button title="Paramètres" class="btn btn-light dropdown-toggle" type="button" id="settings" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fa fa-cog"></i>
+                      <fa-icon [icon]="faCog"></fa-icon>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="settings" style="height:200px;overflow-y: auto">
                       <li class="dropdown-item"  (click)="userSettings(user, $event)" *ngFor="let user of blacklistUsers.sort()">
