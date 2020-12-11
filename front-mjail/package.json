@@ -30,7 +30,7 @@
     "core-js": "2.5.x",
     "email-validator": "^2.0.4",
     "fuse.js": "6.4.3",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "ng-push": "^0.2.2",
     "popper.js": "^1.16.1",
     "rxjs": "^6.6.3",
