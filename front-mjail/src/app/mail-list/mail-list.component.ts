@@ -5,7 +5,7 @@ import {DOCUMENT} from '@angular/common';
 import Fuse from 'fuse.js';
 import { PushNotificationsService} from 'ng-push';
 import { ActivatedRoute } from '@angular/router';
-import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 @NgModule({
     imports: [NgbModule]
@@ -53,6 +53,8 @@ export class MailListComponent implements OnInit {
     baseUrl: string = '';
 
     faCog = faCog;
+    faTimes = faTimes;
+    faCheck = faCheck;
 
     constructor(@Inject(DOCUMENT) private document, private titleService: Title, router: ActivatedRoute, private _pushNotifications: PushNotificationsService) {
 
@@ -450,7 +452,7 @@ export class MailListComponent implements OnInit {
                 } else if (message.type === 'setInit') {
                     message.payload.mails.forEach((mail) => {
 
-                        if (mail.user && this.users.indexOf(mail.user) === -1) {
+                        if (mail.user && this.users.indexOf(mail.user) === -1 && this.blacklist[mail.user] != 1) {
                             if (!this.route || mail.user == this.route) {
                               this.users.push(mail.user);
                               this.notifications[mail.user] = 0;
