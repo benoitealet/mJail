@@ -169,7 +169,7 @@ function connect(config) {
     }
 
     Mail.getRepository = () => {
-        return require(__dirname + '/repository/mailRepository.js').getRepository(models, config);
+        return require(__dirname + '/repository/mailRepository.js').getRepository(models, config, Op);
     }
     Attachment.getRepository = () => {
         return require(__dirname + '/repository/attachmentRepository.js').getRepository(models, config);

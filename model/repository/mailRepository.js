@@ -2,10 +2,11 @@ const fs = require('fs').promises;
 const sanitize = require("sanitize-filename");
 const path = require('path');
 
-module.exports.getRepository = function (models, config) {
+module.exports.getRepository = function (models, config, op) {
 
-    findAllSimpleMails = async function () {
+    findAllSimpleMails = async function (blacklist) {
 
+        console.log(blacklist);
         const list = await models.Mail.findAll({
             include: [
                 'from',
@@ -15,6 +16,11 @@ module.exports.getRepository = function (models, config) {
                 'attachments',
                 'header'
             ],
+            where: {
+              user: {
+                  [op.notIn]: blacklist ? blacklist : []
+              }
+            },
             order: [
                 ['date', 'DESC']
             ]
