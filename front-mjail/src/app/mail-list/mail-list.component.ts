@@ -95,6 +95,10 @@ export class MailListComponent implements OnInit {
         };
     }
 
+    sortCaseInsensitive(list) {
+      return list.sort((a: string, b: string) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    }
+
     copyLink(val: string) {
       document.addEventListener('copy', (e: ClipboardEvent) => {
         e.clipboardData.setData('text/plain', (val));

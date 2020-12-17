@@ -13,7 +13,7 @@
                       <fa-icon [icon]="faCog"></fa-icon>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="settings" style="height:200px;overflow-y: auto">
-                      <li class="dropdown-item"  (click)="userSettings(user, $event)" *ngFor="let user of blacklistUsers.sort()">
+                      <li class="dropdown-item"  (click)="userSettings(user, $event)" *ngFor="let user of sortCaseInsensitive(blacklistUsers)">
                         {{user ? user : 'Anonymous'}}
                         <fa-icon [icon]="blacklist[user] == 1 ? faTimes : faCheck"></fa-icon>
                       </li>
@@ -39,7 +39,7 @@
         </div>
 
         <ngb-tabset class="mails" id="test" type="pills" (tabChange)="userChange($event)">
-            <ngb-tab *ngFor="let user of users.sort()" id="tabUsers_{{user}}">
+            <ngb-tab *ngFor="let user of sortCaseInsensitive(users)" id="tabUsers_{{user}}">
               <ng-container *ngIf="blacklist[user ? user : '__Anonymous'] != 1  || user == route ">
                 <ng-template ngbTabTitle>
                     <i>{{user ? user : 'Anonymous'}}</i>
