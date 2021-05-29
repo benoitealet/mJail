@@ -13,7 +13,7 @@
     "sequelize": "^5.21.5",
     "smtp-server": "^3.4.4",
     "sqlite3": "^4.1.1",
-    "ws": "^5.1.1"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "@angular/cli": "^6.0.3",
